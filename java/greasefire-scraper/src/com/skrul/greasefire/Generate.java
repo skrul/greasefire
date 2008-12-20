@@ -54,6 +54,11 @@ public class Generate {
       "http://*/*.php*",
       "http://www.*.*/*",
       "*.aspx*",
+      "http://*.*/*",
+      "https://*.*/*",
+      "http://*.com/blog/*",
+      "http://*.*.*",
+      "http://*//*",
       "" };
 
   private Set<String> badIncludes;
