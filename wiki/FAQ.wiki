@@ -6,7 +6,7 @@ Greasefire does *not* record or send any data to a server while you browse the w
 
 *Does Greasefire search all scripts on userscripts.org?*
 
-
+No -- The goal of Greasefire is to match scripts to specific web sites, therefore scripts that are designed to work on all sites are explicitly excluded from the index.  I maintain a list of @include lines that I feel are too general, and these scripts are filtered out when the indexes are generated.  See the `badIncludesList` in [http://code.google.com/p/greasefire/source/browse/java/greasefire-scraper/src/com/skrul/greasefire/Generate.java Generate.java].
 
 *How are the scripts ranked?*
 
