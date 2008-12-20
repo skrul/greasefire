@@ -24,3 +24,5 @@ A script's ranking is made up of these three signals, weighted in the following 
 Note that these are the only useful signals Greasefire currently has access to -- the index generator simply scrapes scripts from [http://userscripts.org/scripts http://userscripts.org/scripts] and these are the only number that are available.  I have been working with the owner of the site to see if Greasefire can get access to more data, such as script reviews and fans.
 
 *Why is the extension download so big?  It is over 2MB!*
+
+Greasefire includes several index files that are used to match scripts with the web sites you visit.  The indexes are included with the extension download so Greasefire can begin to work without having to download an index update.  There are currently over 17,000 user scripts, so these indexes can be quite large.  The indexes that are distributed with the extension are refreshed before each new version is released.
