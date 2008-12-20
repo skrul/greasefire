@@ -1,0 +1,7 @@
+#summary Greasefire FAQ
+
+*How does Greasefire impact my privacy?  Does a server track what sites I visit?*
+
+*How are the scripts ranked?*
+
+*Why is the extension download so big?*
