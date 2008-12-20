@@ -59,7 +59,9 @@ public class Generate {
       "http://*.com/blog/*",
       "http://*.*.*",
       "http://*//*",
-      "" };
+      "*pic*",
+      ""
+  };
 
   private Set<String> badIncludes;
 
