@@ -1,0 +1,43 @@
+# Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
+# Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
+
+DEPTH     = ../..
+topsrcdir = @top_srcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+include $(DEPTH)/config/autoconf.mk
+
+MODULE            = greasefire
+DIRS              = src public testharness
+EXTENSION_VERSION = 1.0.2
+
+XPI_NAME             = $(MODULE)
+INSTALL_EXTENSION_ID = greasefire@skrul.com
+XPI_PKGNAME          = $(MODULE)-$(EXTENSION_VERSION)
+
+FIREFOX_MINVERSION=3.0
+FIREFOX_MAXVERSION=3.1.*
+
+DIST_FILES = install.rdf LICENSE
+
+XULAPP_DEFINES = \
+  -DFIREFOX_MINVERSION=$(FIREFOX_MINVERSION) \
+  -DFIREFOX_MAXVERSION=$(FIREFOX_MAXVERSION) \
+  -DEXTENSION_VERSION=$(EXTENSION_VERSION) \
+  -DINSTALL_EXTENSION_ID=$(INSTALL_EXTENSION_ID) \
+  $(NULL)
+
+USE_EXTENSION_MANIFEST = 1
+
+libs::
+	if ! test -d $(FINAL_TARGET)/defaults/preferences; then \
+		$(NSINSTALL) -D $(FINAL_TARGET)/defaults/preferences; \
+	fi;
+	$(INSTALL) $(srcdir)/defaults/preferences/* $(FINAL_TARGET)/defaults/preferences
+	if ! test -d $(FINAL_TARGET)/indexes; then \
+		$(NSINSTALL) -D $(FINAL_TARGET)/indexes; \
+	fi;
+	$(INSTALL) $(srcdir)/indexes/* $(FINAL_TARGET)/indexes
+
+include $(topsrcdir)/config/rules.mk

@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!--
+  Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
+  Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://greasefire/content/prefs.css"?>
+<dialog
+   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+   xmlns:xhtml="http://www.w3.org/1999/xhtml"
+   width="500"
+   height="300"
+   onload="PrefsController.init();"
+   onunload="PrefsController.unload();"
+   buttons="accept"
+   buttonlabelaccept="Close"
+   title="Greasefire Preferences"
+>
+<script
+  type="application/x-javascript"
+  src="chrome://greasefire/content/prefs.js"
+/>
+<groupbox>
+  <caption label="Index Details"/>
+  <hbox>
+    <label value="Index date:"/>
+    <label id="index-date"/>
+  </hbox>
+  <hbox>
+    <label value="Script count:"/>
+    <label id="script-count"/>
+  </hbox>
+</groupbox>
+<groupbox>
+  <caption label="Index Updates"/>
+  <hbox align="center">
+    <checkbox
+       id="auto"
+       label="Automatically update every"
+       oncommand="PrefsController.updateCheckbox(this.checked)"
+    />
+    <textbox
+       id="days"
+       type="number"
+       size="3"
+       onchange="PrefsController.updateInterval(this.value)"
+     />
+    <label value="days" align="center"/>
+  </hbox>
+  <hbox>
+    <label value="Next update:"/>
+    <label id="next-update"/>
+  </hbox>
+  <hbox flex="1">
+    <button label="" id="update-button" oncommand="PrefsController.update();"/>
+    <hbox flex="1">
+      <vbox id="progress-box" flex="1" hidden="true">
+        <spacer flex="1"/>
+        <hbox>
+          <image class="throbber" id="throbber" hidden="true"/>
+          <label id="status"/>
+        </hbox>
+        <progressmeter id="progress" flex="1"/>
+        <spacer flex="1"/>
+      </vbox>
+    </hbox>
+  </hbox>
+</groupbox>
+</dialog>

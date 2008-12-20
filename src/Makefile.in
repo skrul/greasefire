@@ -1,0 +1,18 @@
+# Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
+# Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
+
+DEPTH     = ../../..
+topsrcdir = @top_srcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+include $(DEPTH)/config/autoconf.mk
+
+XPI_NAME = greasefire
+
+EXTRA_PP_COMPONENTS = \
+  gfGreasefireService.js \
+  gfUpdaterService.js \
+  $(NULL)
+
+include $(topsrcdir)/config/rules.mk
