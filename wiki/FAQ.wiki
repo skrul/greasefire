@@ -10,7 +10,7 @@ No -- The goal of Greasefire is to match scripts to specific web sites, therefor
 
 *How are the scripts ranked?*
 
-There are currently three signals used to rank the scripts:
+There are currently three signals used to rank the scripts (see the `rankMatches` method in [http://code.google.com/p/greasefire/source/browse/src/gfGreasefireService.js gfGreasefireService.js]:
 
   * Number of installs (`installs` in the source) - This is simply the number of times the script has been installed according to userscripts.org.
   * Freshness (`updated` in the source) - The last time the script was updated.
