@@ -1,6 +1,8 @@
 #summary Greasefire FAQ
 
-*How does Greasefire impact my privacy?  Does a server track what sites I visit?*
+*How does Greasefire impact my privacy?  Do you track what sites I visit?*
+
+Greasefire does *not* record or send any data to a server while you browse the web.  The process that matches scripts to the sites you visit is done by querying a local index of all the scripts from userscripts.org (see the files include.dat, exclude.dat, and scripts.db in the extension directory).  This index is refreshed periodically to ensure you see the latest scripts available.
 
 *How are the scripts ranked?*
 
