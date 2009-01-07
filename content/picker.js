@@ -193,30 +193,8 @@ ScriptRequest.prototype = {
 
       // fix images with relative paths
       text = text.replace("src=\"/", "src=\"http://userscripts.org/", "g");
-
       text = "<style>" + css + "</style>" + text;
-
-      var file = Cc["@mozilla.org/file/directory_service;1"]
-                   .getService(Ci.nsIProperties)
-                   .get("TmpD", Ci.nsIFile);
-      file.append("greasefire.html");
-      file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
-
-      var fos = Cc["@mozilla.org/network/file-output-stream;1"]
-                  .createInstance(Ci.nsIFileOutputStream);
-      fos.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
-
-      var os = Cc["@mozilla.org/intl/converter-output-stream;1"]
-                 .createInstance(Ci.nsIConverterOutputStream);
-      os.init(fos, "UTF-8", 0, 0x0000);
-      os.writeString(text);
-      os.close();
-      fos.close();
-
-      var ios = Cc["@mozilla.org/network/io-service;1"]
-                  .getService(Ci.nsIIOService);
-      var uri = ios.newFileURI(file);
-      uriSpec = uri.spec;
+      uriSpec = "data:text/html," + encodeURIComponent(text);
     }
     else {
       uriSpec = "about:blank";
