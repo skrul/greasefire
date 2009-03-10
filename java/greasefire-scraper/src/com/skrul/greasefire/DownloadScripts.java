@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -115,7 +116,7 @@ public class DownloadScripts {
           }
 
         } catch (IOException e) {
-          logger.severe(script + " " + e.getMessage());          
+          logger.log(Level.SEVERE, script.url, e);
         }
       }
 
@@ -152,16 +153,16 @@ public class DownloadScripts {
         Script script = new Script();
         script.url = matcher.group(1);
         script.installs = Integer.parseInt(matcher.group(2));
-        String d = matcher.group(3).replace("-06:00", "-0600");
+        String d = matcher.group(3).replace("Z", "-0000");
         script.updated = sdf.parse(d).getTime();
         script.id = script.url.substring(script.url.lastIndexOf("/") + 1);
 
         scripts.add(script);
       }
     } catch (IOException e) {
-      logger.severe(e.getMessage());
+      logger.log(Level.SEVERE, url, e);
     } catch (ParseException e) {
-      logger.severe(e.getMessage());
+      logger.log(Level.SEVERE, url, e);
     }
 
     return scripts;
