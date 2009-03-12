@@ -60,6 +60,9 @@ public class Generate {
       "http://*.*.*",
       "http://*//*",
       "*pic*",
+      "http*://*/*",
+      "http://",
+      "http://*.*/*/",
       ""
   };
 
