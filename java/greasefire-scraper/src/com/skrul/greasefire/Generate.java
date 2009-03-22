@@ -63,6 +63,7 @@ public class Generate {
       "http*://*/*",
       "http://",
       "http://*.*/*/",
+      "htt*://*",
       ""
   };
 
