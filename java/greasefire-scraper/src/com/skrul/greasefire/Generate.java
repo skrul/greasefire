@@ -41,6 +41,7 @@ public class Generate {
       "http://*/*",
       "http://*/",
       "http://www.*",
+      "http://www*",
       "http*",
       "www.*",
       "http://*.*.*/*",
