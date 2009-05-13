@@ -18,6 +18,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.TagNode;
+import org.htmlcleaner.XPatherException;
 
 public class DownloadScripts {
 
@@ -48,10 +51,10 @@ public class DownloadScripts {
   public void run(File dir, boolean full) {
 
     HttpClient client = new HttpClient();
-    String url = "http://userscripts.org/scripts?page=";
+    String url = "http://greasefire.userscripts.org/scripts?page=";
     int page = 1;
     boolean done = false;
-    while (!done && page < 1000) {
+    while (!done && page < 1500) {
       List<Script> scripts = getScripts(client, url + page);
       logger.info("page: " + page + " " + scripts.size() + " scripts");
       if (scripts.size() == 0) {
@@ -90,7 +93,7 @@ public class DownloadScripts {
           logger.info("page: " + page + " " + script.url + " "
               + script.installs + " " + script.updated);
                     
-          HttpMethod method = new GetMethod("http://userscripts.org/scripts/source/" + script.id + ".user.js?greasefire");
+          HttpMethod method = new GetMethod("http://greasefire.userscripts.org/scripts/source/" + script.id + ".user.js?greasefire");
           try {
             client.executeMethod(method);
             String source = method.getResponseBodyAsString();
@@ -100,6 +103,8 @@ public class DownloadScripts {
 
             p.setProperty("id", script.id);
             p.setProperty("installs", Integer.toString(script.installs));
+            p.setProperty("fans", Integer.toString(script.fans));
+            p.setProperty("posts", Integer.toString(script.posts));
             p.setProperty("updated", Long.toString(script.updated));
             p.setProperty("hash", Long.toString(scriptFile.length()));
             p.store(new FileOutputStream(props), "");
@@ -140,37 +145,47 @@ public class DownloadScripts {
         throw new RuntimeException("Failed to get page: " + statusCode);
       }
       String response = method.getResponseBodyAsString();
+      HtmlCleaner html = new HtmlCleaner();
+      TagNode content = html.clean(response).findElementByAttValue("id", "content", true, false);
+      Object[] rows = content.evaluateXPath("table/tbody/tr[@id]");
+      for (Object row: rows) {
+        if (!(row instanceof TagNode)) {
+          continue;
+        }
+        TagNode rowNode = (TagNode) row;
+        try {
+          Script script = new Script();
+          String id = rowNode.getAttributeByName("id").replace("scripts-", "");        
+          TagNode nameNode = rowNode.getChildTags()[0].getChildTags()[0];
+          String scriptUrl = nameNode.getAttributeByName("href");         
+          int posts = Integer.parseInt(rowNode.getChildTags()[1].getText().toString());
+          int fans = Integer.parseInt(rowNode.getChildTags()[2].getText().toString());
+          int installs = Integer.parseInt(rowNode.getChildTags()[3].getText().toString());
+          TagNode updatedNode = rowNode.getChildTags()[4];
+          String dateString = updatedNode.getChildTags()[0].getAttributeByName("title").replace("Z", "-0000");
 
-      // I should be shot for this
-      String regexp = "/scripts/source/(\\d+)\\.user\\.js.*?"
-          + "<td class='inv lp'>\\d+</td>.*?"
-          + "<td class='inv lp'>(\\d+)</td>.*?" + "title='([^']+)'";
-
-      Pattern scriptsRegexp = Pattern.compile(regexp, Pattern.DOTALL);
-      Matcher matcher = scriptsRegexp.matcher(response);
-
-      while (matcher.find()) {
-        Script script = new Script();
-        script.url = matcher.group(1);
-        script.installs = Integer.parseInt(matcher.group(2));
-        String d = matcher.group(3).replace("Z", "-0000");
-        script.updated = sdf.parse(d).getTime();
-        script.id = script.url.substring(script.url.lastIndexOf("/") + 1);
-
-        scripts.add(script);
+          script.id = id;
+          script.url = scriptUrl;
+          script.updated = sdf.parse(dateString).getTime();          
+          script.installs = installs;
+          script.posts = posts;
+          script.fans = fans;
+          scripts.add(script);
+        } catch (Exception e) {
+          logger.log(Level.SEVERE, "Can't parse row " + rowNode, e);
+        }
       }
-    } catch (IOException e) {
-      logger.log(Level.SEVERE, url, e);
-    } catch (ParseException e) {
+    } catch (Exception e) {
       logger.log(Level.SEVERE, url, e);
     }
-
     return scripts;
   }
 
   class Script {
     String url;
     int installs;
+    int posts;
+    int fans;
     long updated;
     String id;
   }

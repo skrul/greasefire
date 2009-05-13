@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/sqlitejdbc-v043-nested.jar"/>
+	<classpathentry kind="lib" path="lib/htmlcleaner2_1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
