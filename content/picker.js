@@ -11,7 +11,7 @@ function GF_Trim(s) {
   return s.replace(/^\s\s*/, "").replace(/\s\s*$/, "");
 }
 
-const US_BASE = "http://userscripts.org/scripts/";
+const US_BASE = "http://greasefire.userscripts.org/scripts/";
 
 function $(id) {
   return document.getElementById(id);
@@ -28,6 +28,9 @@ var PickerController = {
   _list: null,
   _info: null,
   _source: null,
+  _tabpanels: null,
+  _scriptInfoLoaded: false,
+  _scriptSourceLoaded: false,
   _busyCount: 0,
 
   init: function PickerController_init() {
@@ -56,6 +59,9 @@ var PickerController = {
     wp = getWebProgress(this._source);
     wp.addProgressListener(this, flags);
 
+    this._tabpanels = $("tabpanels");
+    this._tabpanels.addEventListener("select", this, false);
+
     if (this._results.length > 0) {
       this._list.view.selection.select(0);
     }
@@ -82,7 +88,13 @@ var PickerController = {
   },
 
   handleEvent: function (aEvent) {
+    // This select event is for either the result list or tab panel.
     if (aEvent.type == "select") {
+      // If the list selection changed, clear the load flags.
+      if (aEvent.target.id == "list") {
+        this._scriptInfoLoaded = false;
+        this._scriptSourceLoaded = false;
+      }
       var index = this._list.view.selection.currentIndex;
       var info = this._view.getInfo(index);
       this._scriptSelected(info);
@@ -107,8 +119,18 @@ var PickerController = {
           return false;
         }
 
-        var url = ios.newURI($("url").value, null, null);
+        // HACK: remove the greasefire subdomain from the URL so
+        // clicked linkes go back to http://userscripts.org
+        var currentUrl = $("url").value;
+        currentUrl = currentUrl.replace("http://greasefire.", "http://");
+
+        var url = ios.newURI(currentUrl, null, null);
         var absolute = url.resolve(href);
+
+        // Append source=greasefire so we can track clicks back to the
+        // main site.
+        absolute += absolute.indexOf("?") == -1 ? "?" : "&";
+        absolute += "source=greasefire";
         openURL(absolute);
         return false;
       }
@@ -118,21 +140,41 @@ var PickerController = {
 
   _scriptSelected: function (aInfo) {
     this._install.label = "Install \"" + aInfo.name + "\"";
-    var req = new ScriptRequest(aInfo, this);
-    req.load();
+
+    if (this._tabpanels.selectedPanel.id == "info_panel") {
+      this._loadInfo(aInfo);
+    } else {
+      this._loadSource(aInfo);
+    }
   },
 
-  _infoLoaded: function (aInfo, aUriSpec) {
-    this._info.webNavigation.loadURI(aUriSpec,
+  _loadInfo: function (aInfo) {
+    var uri = US_BASE + "show/" + aInfo.scriptId;
+    $("url").value = uri;
+    if (this._scriptInfoLoaded) {
+      return;
+    }
+    this._info.webNavigation.loadURI(uri,
                                      Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
                                      null,
                                      null,
                                      null);
-    this._source.webNavigation.loadURI(US_BASE + "review/" + aInfo.scriptId + "?format=txt",
-                                       Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
-                                       null,
-                                       null,
-                                       null);
+    this._scriptInfoLoaded = true;
+  },
+
+  _loadSource: function(aInfo) {
+    var uri = US_BASE + "review/" + aInfo.scriptId + ".txt";
+    $("url").value = uri;
+    if (this._scriptSourceLoaded) {
+      return;
+    }
+    this._source.webNavigation.loadURI(
+      uri,
+      Ci.nsIWebNavigation.LOAD_FLAGS_NONE,
+      null,
+      null,
+      null);
+    this._scriptSourceLoaded = true;
   },
 
   // nsIWebProgressListener
@@ -157,54 +199,6 @@ var PickerController = {
       throw Components.results.NS_ERROR_NO_INTERFACE;
 
     return this;
-  }
-
-}
-
-function ScriptRequest(aScript, aController) {
-  this._controller = aController;
-  this._script = aScript;
-  this._xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-                .createInstance(Ci.nsIXMLHttpRequest);
-}
-
-ScriptRequest.prototype = {
-
-  load: function () {
-
-    var url = US_BASE + "show/" + this._script.scriptId;
-    this._xhr.addEventListener("load", this, false);
-    this._xhr.addEventListener("error", this, false);
-    this._xhr.open("GET", url, true);
-    this._xhr.send(null);
-
-    $("url").value = url;
-  },
-
-  handleEvent: function (aEvent) {
-
-    var uriSpec;
-    if (aEvent.type == "load") {
-      var css = "";
-      css += "#mainmenu, #script_search, #account, #right { display: none }";
-      css += "#content { margin: 0 0 0 0 !important }";
-      css += "body { background: #ffffff none !important }";
-      var text = this._xhr.responseText;
-
-      // fix images with relative paths
-      text = text.replace("src=\"/", "src=\"http://userscripts.org/", "g");
-      text = "<style>" + css + "</style>" + text;
-      uriSpec = "data:text/html," + encodeURIComponent(text);
-    }
-    else {
-      uriSpec = "about:blank";
-    }
-
-    this._xhr.removeEventListener("load", this, false);
-    this._xhr.removeEventListener("error", this, false);
-    this._xhr = null;
-
-    this._controller._infoLoaded(this._script, uriSpec);
   }
 
 }

@@ -10,7 +10,7 @@ include $(DEPTH)/config/autoconf.mk
 
 MODULE            = greasefire
 DIRS              = public src testharness
-EXTENSION_VERSION = 1.0.3
+EXTENSION_VERSION = 1.0.4
 
 XPI_NAME             = $(MODULE)
 INSTALL_EXTENSION_ID = greasefire@skrul.com

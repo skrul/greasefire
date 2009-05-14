@@ -27,11 +27,11 @@
 </keyset>
 
 <hbox flex="1">
-  <vbox width="250">
+  <vbox width="250" id="left-content-area" persist="width">
     <hbox>
       <textbox
         id="filter"
-         type="timed"
+        type="timed"
         flex="1"
         emptytext="Filter scripts..."
         timeout="500"
@@ -80,7 +80,7 @@
     </tree>
   </vbox>
   <splitter/>
-  <vbox flex="1">
+  <vbox flex="1" persist="width" id="right-content-area">
     <hbox align="center">
       <textbox id="url" readonly="true" flex="1"/>
       <hbox align="right">
@@ -92,11 +92,11 @@
         <tab label="Details"/>
         <tab label="Source"/>
       </tabs>
-      <tabpanels flex="1">
-        <tabpanel>
+      <tabpanels flex="1" id="tabpanels">
+        <tabpanel id="info_panel">
           <browser type="content" flex="1" id="info"/>
         </tabpanel>
-        <tabpanel>
+        <tabpanel id="source_panel">
           <browser type="content" flex="1" id="source"/>
         </tabpanel>
       </tabpanels>
