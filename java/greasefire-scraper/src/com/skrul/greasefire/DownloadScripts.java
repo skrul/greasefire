@@ -158,10 +158,10 @@ public class DownloadScripts {
           String id = rowNode.getAttributeByName("id").replace("scripts-", "");        
           TagNode nameNode = rowNode.getChildTags()[0].getChildTags()[0];
           String scriptUrl = nameNode.getAttributeByName("href");         
-          int posts = Integer.parseInt(rowNode.getChildTags()[1].getText().toString());
-          int fans = Integer.parseInt(rowNode.getChildTags()[2].getText().toString());
-          int installs = Integer.parseInt(rowNode.getChildTags()[3].getText().toString());
-          TagNode updatedNode = rowNode.getChildTags()[4];
+          int posts = Integer.parseInt(rowNode.getChildTags()[2].getText().toString());
+          int fans = Integer.parseInt(rowNode.getChildTags()[3].getText().toString());
+          int installs = Integer.parseInt(rowNode.getChildTags()[4].getText().toString());
+          TagNode updatedNode = rowNode.getChildTags()[5];
           String dateString = updatedNode.getChildTags()[0].getAttributeByName("title").replace("Z", "-0000");
 
           script.id = id;
