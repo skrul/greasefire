@@ -5,11 +5,11 @@ DEST="index_$DATE.jar"
 
 # Download scripts
 cd /Users/steve/greasefire
-java -jar downloadscripts.jar scripts $1
+java -jar greasefire/java/greasefire-scraper/downloadscripts.jar scripts $1
 
 # Generate indexes into tmp
 mkdir tmp
-java -Xmx512m -jar generateindex.jar scripts tmp
+java -Xmx512m -jar greasefire/java/greasefire-scraper/generateindex.jar scripts tmp
 
 # Jar up indexes
 cd tmp
