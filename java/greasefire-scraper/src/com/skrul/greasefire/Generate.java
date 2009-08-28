@@ -68,6 +68,7 @@ public class Generate {
       "h",
       "http://*.*",
       "http://*.*.*.*/*",
+      "http://*.com/*",
       ""
   };
 
