@@ -70,6 +70,8 @@ public class Generate {
       "http://*.*.*.*/*",
       "http://*.com/*",
       "http:",
+      "http://*blog*",
+      "http://**",
       ""
   };
 
@@ -235,65 +237,4 @@ public class Generate {
     }
 
   }
-
-  public static void json(Node n, StringBuffer s) {
-
-    s.append('{');
-
-    if (n.ids != null) {
-      s.append("\" \":");
-      int size = n.ids.size();
-      Integer[] ids = new Integer[size];
-      ids = n.ids.toArray(ids);
-      s.append('[');
-      for (int i = 0; i < size; i++) {
-        s.append(ids[i]);
-        if (i + 1 < size) {
-          s.append(',');
-        }
-      }
-      s.append(']');
-    }
-
-    Set<Character> keys = n.children.keySet();
-    int size = keys.size();
-    Character[] children = new Character[size];
-    children = keys.toArray(children);
-
-    if (n.ids != null && size > 0) {
-      s.append(',');
-    }
-
-    for (int i = 0; i < size; i++) {
-      char c = children[i];
-      Node node = n.children.get(c);
-      // if (c >= 'a' && c <= 'z') {
-      // s.append(c);
-      // }
-      // else {
-
-      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-        s.append(c);
-      } else {
-        s.append('"');
-        if (c == '"') {
-          s.append("\\\"");
-        } else if (c == '\\') {
-          s.append("\\\\");
-        } else {
-          s.append(c);
-        }
-        s.append('"');
-      }
-
-      s.append(':');
-      json(node, s);
-      if (i + 1 < size) {
-        s.append(',');
-      }
-    }
-
-    s.append('}');
-  }
-
 }
