@@ -16,9 +16,11 @@ cd tmp
 echo "[indexes]" > info.ini
 echo "date=$DATE" >> info.ini
 jar cvfM $DEST include.dat exclude.dat scripts.db info.ini
+mkdir $DATE
+cp include.png exclude.png $DATE
 
 # Copy indexes to skrul.com
-scp ./$DEST skrul@skrul.com:skrul.com/projects/greasefire/indexes
+scp -r ./$DEST ./$DATE skrul@skrul.com:skrul.com/projects/greasefire/indexes
 
 # Clean up tmp
 cd ..
