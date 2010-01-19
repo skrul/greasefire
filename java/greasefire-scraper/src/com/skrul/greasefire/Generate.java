@@ -199,8 +199,16 @@ public class Generate {
     fos = new FileOutputStream(excludesFile);
     excludesIndex.serialize(fos);
     fos.close();
-  }
 
+    PNGOutputStream pos = new PNGOutputStream(new File(destDir, "include.png"));
+    includesIndex.serialize(pos);
+    pos.close();
+
+    pos = new PNGOutputStream(new File(destDir, "exclude.png"));
+    excludesIndex.serialize(pos);
+    pos.close();
+}
+  
   public static void search(Node n, String s, int pos, Set<Integer> matches) {
 
     if (n.ids != null) {
