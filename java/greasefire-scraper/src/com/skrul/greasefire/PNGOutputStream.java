@@ -25,15 +25,19 @@ public class PNGOutputStream extends OutputStream {
     if (size - Math.floor(size) > 0)
       size++;
 
-    BufferedImage bi = new BufferedImage((int) size, 1, BufferedImage.TYPE_INT_RGB);
+    double width = Math.ceil(Math.sqrt(size));
+    
+    BufferedImage bi = new BufferedImage((int) width, (int) width, BufferedImage.TYPE_INT_RGB);
     int pos = 0;
-    for (int i = 0; i < bytes.length; i += 3) {
-      int r = bytes[i];
-      int g = i + 1 < bytes.length ? bytes[i + 1] : 0;
-      int b = i + 2 < bytes.length ? bytes[i + 2] : 0;
-      int value = ((r & 0xFF) << 16) | ((g & 0xFF) << 8)  | ((b & 0xFF) << 0);
-      bi.setRGB(pos, 0, value);
-      pos++;
+    for (int y = 0; y < width; y++) {
+      for (int x = 0; x < width; x++) {
+        int r = pos < bytes.length ? bytes[pos] : 0;
+        int g = pos + 1 < bytes.length ? bytes[pos + 1] : 0;
+        int b = pos + 2 < bytes.length ? bytes[pos + 2] : 0;
+        int value = ((r & 0xFF) << 16) | ((g & 0xFF) << 8)  | ((b & 0xFF) << 0);
+        bi.setRGB(x, y, value);
+        pos += 3;
+      }
     }
     ImageIO.write(bi, "png", this.outputFile);
   }
