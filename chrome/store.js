@@ -151,8 +151,7 @@ Store.prototype = {
         "delete from indexes"
       ],
       [
-        "delete from scripts",
-        []
+        "delete from scripts"
       ],
       [
         "insert into indexes (version, includes, excludes) values (?, ?, ?)",
