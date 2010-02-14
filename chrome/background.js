@@ -38,6 +38,10 @@ function load() {
             timer.mark("search " + request.url);
           });
         }
+
+        if (request.action == "install") {
+          installScript(request.url);
+        }
       }
     );
 
@@ -61,7 +65,6 @@ function isValid(tab) {
   return tab.status == "complete" && tab.url.match(/^http/);
 }
 
-
 function testUrl(tab) {
   if (!isValid(tab)) {
     chrome.pageAction.hide(tab.id);
@@ -82,4 +85,10 @@ function testUrl(tab) {
   } else {
     chrome.pageAction.hide(tab.id);
   }
+}
+
+function installScript(url) {
+  chrome.tabs.executeScript(null, {
+    code: "window.location = '" + url + "';"
+  });
 }

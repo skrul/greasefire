@@ -20,7 +20,11 @@ function load() {
       });
   });
 
-  $("#results").click(function() {
-    alert(this);
+  $("#results").click(function(e) {
+    var url = e.target.href;
+    if (url) {
+      chrome.extension.sendRequest({action: "install", url: url});
+      window.close();
+    }
   });
 }
