@@ -6,8 +6,11 @@
 <script src="index_reader.js"></script>
 <script src="downloader.js"></script>
 <script src="updater.js"></script>
-<script src="background.js"></script>
+<script src="greasefire.js"></script>
+<script>
+var greasefire = new Greasefire();
+</script>
 </head>
-<body onload="load();">
+<body onload="greasefire.init();">
 </body>
 </html>

@@ -1,3 +1,5 @@
+var DEBUG = true;
+
 function Wrapper(that, callback) {
   this.that_ = that;
   this.callback_ = callback;
@@ -29,5 +31,14 @@ Timer.prototype = {
 function d(s) {
   if (DEBUG) {
     console.log(s.substr(0, 100));
+  }
+}
+
+function bind(o, f) {
+  console.log(arguments);
+  return function() {
+    if (typeof f == "string")
+      f = o[f];
+    f.apply(o, arguments);
   }
 }
