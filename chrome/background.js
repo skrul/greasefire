@@ -12,7 +12,9 @@ function load() {
     chrome.extension.onRequest.addListener(
       function(request, sender, sendResponse) {
         if (request.action == "update") {
-          updater.update();
+          updater.update(function() {
+            alert("updated");
+          });
           sendResponse({});
           return;
         }

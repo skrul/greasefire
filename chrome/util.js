@@ -28,6 +28,6 @@ Timer.prototype = {
 
 function d(s) {
   if (DEBUG) {
-    console.log(s.substring(100));
+    console.log(s.substr(0, 100));
   }
 }

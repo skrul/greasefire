@@ -1,9 +1,21 @@
 <html>
 <head>
+<style>
+#throbber {
+  width: 16px;
+  height: 16px;
+  background-image: url(throbber.png);
+  background-repeat: no-repeat;
+}
+</style>
+<script src="jquery-1.3.2.min.js"></script>
+<script src="throbber.js"></script>
 <script src="options.js"></script>
 <title>Greasefire Options</title>
 </head>
 <body onload="load();">
+<div id="throbber">
+</div>
 <input type="button" name="update" value="Update" onclick="update();">
 <input type="text" id="progress" value="">
 </body>

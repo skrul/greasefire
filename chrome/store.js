@@ -166,18 +166,27 @@ Store.prototype = {
       ]
     ];
 
+    function esc(s) {
+      return s.replace(/'/g, "''"); // '
+    }
+
     var list = scripts_list.split(/\n/);
     var re = /^(\d+) (\d+) (\d+) (.*)$/;
-    for (var i = 0; i < list.length; i++) {
-      var a = list[i].match(re);
-      if (a) {
-        stmts.push(
-          ["insert into scripts (" +
-             "id, name, installs, updated) values (?, ?, ?, ?)",
-           [a[1], a[4], a[2], a[3]]
-          ]
-        );
+    // See SQLITE_MAX_COMPOUND_SELECT
+    var MAX = 500;
+    for (var i = 0; i < list.length; i += MAX) {
+      var bulk = [];
+      for (var j = i; j < i + MAX && j < list.length; j++) {
+        var a = list[j].match(re);
+        if (a) {
+          bulk.push("select " + a[1] +
+                    ", '" + esc(a[4]) +
+                    "', " + a[2] +
+                    ", " + a[3]);
+        }
       }
+      stmts.push(["insert into scripts (id, name, installs, updated) " +
+                  bulk.join(" union ")]);
     }
 
     var that = this;
@@ -185,6 +194,7 @@ Store.prototype = {
       if (success) {
         that.includes_ = new IndexReader(includes_stream);
         that.excludes_ = new IndexReader(excludes_stream);
+        callback(true);
       } else {
         callback(success, error);
       }
@@ -194,6 +204,8 @@ Store.prototype = {
   executeStatements_: function(stmts, callback) {
     var fail = this.makeFailHandler_(callback);
     var run_text_statement = function(t) {
+      chrome.extension.sendRequest({action: "updater-progress",
+                                    loaded: stmts.length});
       if (stmts.length > 0) {
         var pair = stmts.shift();
         t.executeSql(pair[0], pair[1], run_text_statement, fail);

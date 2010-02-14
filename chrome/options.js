@@ -1,15 +1,21 @@
+var throbber;
+
 function update() {
   chrome.extension.sendRequest({action: "update"});
 }
 
 function load() {
+  throbber = new Throbber(window, document.getElementById("throbber"));
   chrome.extension.onRequest.addListener(
     function(request, sender, sendResponse) {
-      if (request.action == "progress") {
-        document.getElementById("progress").value = request.loaded;
+      if (request.action == "updater-start") {
+        throbber.start();
       }
-      if (request.action == "message") {
-        document.getElementById("progress").value = request.message;
+      if (request.action == "updater-done") {
+        throbber.stop();
+      }
+      if (request.action == "updater-progress") {
+        document.getElementById("progress").value = request.loaded;
       }
     }
   );
