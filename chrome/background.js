@@ -2,10 +2,12 @@ var DEBUG = true;
 
 var store = new Store();
 var updater = new Updater(store);
+var updated_tabs = {};
 
 function load() {
   store.init(function(success, error) {
-    console.log("callback " + success + " " + error);
+    d("callback " + success + " " + error);
+    updated_tabs = {};
 
     chrome.extension.onRequest.addListener(
       function(request, sender, sendResponse) {
@@ -16,7 +18,7 @@ function load() {
         }
 
         if (request.action == "search") {
-          console.log("search " + request.url);
+          d("search " + request.url);
           var matches = {};
           var timer = new Timer();
           store.includes().search(request.url, matches, false);
@@ -40,29 +42,44 @@ function load() {
     );
 
     chrome.tabs.onUpdated.addListener(function(tagId, changeInfo, tab) {
-      if (tab.status == "complete" &&
-          store.includes() &&
-          tab.url.match(/^http/)) {
-        console.log("test " + tab.url);
-        var matches = {};
-        var timer = new Timer();
-        store.includes().search(tab.url, matches, true);
-        timer.mark("search " + tab.url);
-        var found = false;
-        for (var id in matches) {
-          found = true;
-          console.log(id + " " + matches[id]);
-        }
-        if (found) {
-          chrome.pageAction.show(tab.id);
-        } else {
-          chrome.pageAction.hide(tab.id);
-        }
+      testUrl(tab);
+    });
+
+    chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
+      if (!(tabId in updated_tabs)) {
+        chrome.tabs.get(tabId, function(tab) {
+          testUrl(tab);
+          updated_tabs[tabId] = true;
+        });
       }
     });
-  });
 
-  chrome.pageAction.onClicked.addListener(function(tab) {
-    chrome.tabs.create({url: "picker.html?url=" + encodeURIComponent(tab.url)});
   });
+}
+
+function isValid(tab) {
+  return tab.status == "complete" && tab.url.match(/^http/);
+}
+
+
+function testUrl(tab) {
+  if (!isValid(tab)) {
+    chrome.pageAction.hide(tab.id);
+    return;
+  }
+
+  var matches = {};
+  var timer = new Timer();
+  store.includes().search(tab.url, matches, true);
+  timer.mark("testUrl " + tab.url);
+  var found = false;
+  for (var id in matches) {
+    found = true;
+    console.log(id + " " + matches[id]);
+  }
+  if (found) {
+    chrome.pageAction.show(tab.id);
+  } else {
+    chrome.pageAction.hide(tab.id);
+  }
 }

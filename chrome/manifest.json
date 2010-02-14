@@ -11,6 +11,7 @@
   "background_page": "background.html",
   "page_action": {
     "default_icon": "icon.png",
-    "default_title": "foo"
+    "default_title": "Userscripts Available",
+    "popup": "popup.html"
   }
 }

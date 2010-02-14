@@ -21,7 +21,6 @@ IndexReader.prototype = {
       this.stream_.seek(aIndexPos);
 
       var idsLength = this.stream_.read64();
-      console.log(idsLength);
       if (idsLength > 0) {
         var ids = [];
         for (var i = 0; i < idsLength; i++) {
@@ -31,7 +30,6 @@ IndexReader.prototype = {
       }
 
       var childrenLength = this.stream_.read16();
-      console.log(childrenLength);
       for (var i = 0; i < childrenLength; i++) {
         var c = String.fromCharCode(this.stream_.read16());
         var pos = this.stream_.read64();
