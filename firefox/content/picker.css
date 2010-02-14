@@ -1,0 +1,19 @@
+/*
+ * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
+ * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
+ */
+#list > treechildren::-moz-tree-progressmeter {
+  border: 1px solid #999999;
+  margin: 6px 0px 6px 0px;
+  background-color: transparent;
+  color: #5ece10;
+}
+
+.throbber {
+  width: 16px;
+  height: 16px;
+}
+
+.throbber-throb {
+  list-style-image: url("chrome://global/skin/icons/loading_16.png");
+}
