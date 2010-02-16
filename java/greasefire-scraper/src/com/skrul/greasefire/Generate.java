@@ -1,15 +1,18 @@
 package com.skrul.greasefire;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,8 +191,24 @@ public class Generate {
     conn.setAutoCommit(false);
     ps.executeBatch();
     conn.setAutoCommit(true);
-    conn.close();
 
+    BufferedWriter scripts = new BufferedWriter(new FileWriter(new File(destDir, "scripts.txt")));
+    PreparedStatement ps = conn.prepareStatement("select id, installs, updated, name from scripts");
+    ResultSet rs = ps.executeQuery();
+    while (rs.next()) {
+      scripts.write(rs.getString(1));
+      scripts.write(' ');
+      scripts.write(rs.getString(2));
+      scripts.write(' ');
+      scripts.write(rs.getString(3));
+      scripts.write(' ');
+      scripts.write(rs.getString(4));
+      scripts.newLine();
+    }
+    rs.close();
+    conn.close();
+    scripts.close();
+    
     File includesFile = new File(destDir, "include.dat");
     FileOutputStream fos = new FileOutputStream(includesFile);
     includesIndex.serialize(fos);
