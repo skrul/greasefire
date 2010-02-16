@@ -1,3 +1,4 @@
+var LATEST_URL = "http://skrul.com/projects/greasefire/indexes/latest";
 var URL = "http://skrul.com/projects/greasefire/indexes/2010-01-21T04:31:30Z/";
 
 function Updater(store) {
@@ -6,7 +7,14 @@ function Updater(store) {
 }
 
 Updater.prototype = {
-  update: function(callback) {
+  update: wrap(function(callback) {
+    this.getCurrentVersion_(function(success, date) {
+      console.log(date);
+      console.log(formatISO8601(date));
+      callback(true);
+    });
+    return;
+
     if (this.isUpdating_) {
       callback(false, "Already updating");
     }
@@ -55,5 +63,19 @@ Updater.prototype = {
         downloader.get(URL + "scripts.txt", done_downloading);
       });
     });
-  }
+  }),
+
+  getCurrentVersion_: wrap(function(callback) {
+    var downloader = new Downloader();
+    downloader.get(LATEST_URL, function(data, error) {
+      if (data) {
+        var d = parseISO8601(data);
+        if (d) {
+          callback(true, d);
+          return;
+        }
+      }
+      callback(false, error);
+    });
+  })
 }

@@ -1,6 +1,6 @@
 var throbber;
 
-function update() {
+function do_update() {
   chrome.extension.sendRequest({action: "update"});
 }
 

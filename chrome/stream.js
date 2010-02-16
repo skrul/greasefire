@@ -15,7 +15,8 @@ Stream.prototype = {
     return b;
   },
 
-  load: function(document, url, callback) {
+  load: wrap(function(document, url, callback) {
+    var timer = new Timer();
     var image = new Image();
     var that = this;
     image.onload = function() {
@@ -27,10 +28,11 @@ Stream.prototype = {
       context.drawImage(image, 0, 0, image.width, image.height);
       that.data_ = context.getImageData(0, 0, image.width, image.height).data;
       that.pos_ = 0;
+      timer.mark("stream loaded from '" + url + "', length = " + that.length_);
       callback();
     }
     image.src = url;
-  },
+  }),
 
   getDataUrl: function() {
     return this.canvas_.toDataURL();

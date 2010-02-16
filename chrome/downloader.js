@@ -21,7 +21,7 @@ Downloader.prototype = {
   },
 
   onRequestEvent_: function(event) {
-    if (event.type == "progress") {
+    if (event.type == "progress" && this.on_progress_) {
       this.on_progress_(event.loaded, event.total);
       return;
     }

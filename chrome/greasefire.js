@@ -6,12 +6,13 @@ function Greasefire() {
 
 Greasefire.prototype = {
   init: function() {
+    var timer = new Timer();
     d("greasefire init");
     var that = this;
     // Initialize the store.  This sets up the database and sets up
     // the indexes with any existing data.
     this.store_.init(function(success, error) {
-      d("store init " + success + " " + error);
+      timer.mark("store init " + success + " " + error);
       that.updated_tabs_ = {};
 
       // Set up listeners.
@@ -30,6 +31,7 @@ Greasefire.prototype = {
   },
 
   onRequest: function(request, sender, sendResponse) {
+    d("onRequest " + request);
     switch(request.action) {
     case "update":
       this.updateData_(function() {
@@ -43,6 +45,7 @@ Greasefire.prototype = {
       break;
     case "install":
       this.installScript_(request.url);
+      sendResponse({});
       break;
     }
   },
@@ -61,14 +64,16 @@ Greasefire.prototype = {
     }
   },
 
-  updateData_: function(callback) {
+  updateData_: wrap(function(callback) {
+    d("updateData");
+    var timer = new Timer();
     this.updater_.update(function() {
-      alert("updated");
+      timer.mark("updated");
     });
     callback();
-  },
+  }),
 
-  search_: function(url, callback) {
+  search_: wrap(function(url, callback) {
     d("search " + url);
     var matches = {};
     var timer = new Timer();
@@ -88,7 +93,7 @@ Greasefire.prototype = {
       }
       timer.mark("search " + url);
     });
-  },
+  }),
 
   installScript_: function(url) {
     chrome.tabs.executeScript(null, {
@@ -106,7 +111,7 @@ Greasefire.prototype = {
     var timer = new Timer();
     this.store_.includes().search(tab.url, matches, true);
     // TODO: check excludes.
-    timer.mark("testUrl " + tab.url);
+    timer.mark("updatePageAction " + tab.url);
     var found = false;
     for (var id in matches) {
       found = true;

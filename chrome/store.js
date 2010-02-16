@@ -14,23 +14,18 @@ Store.prototype = {
     return this.excludes_;
   },
 
-  init: function(callback) {
+  init: wrap(function(callback) {
+    d("Store.init");
     this.db_ = openDatabase(
       "greasefire",
-      "1",
+      "",
       "greasefire",
       40 * 1024 * 1024);
-
-    var fail = this.makeFailHandler_(callback);
 
     var stmts = [
       [
         "create table if not exists meta (" +
           "key text primary key on conflict replace, value text)"
-      ],
-      [
-        "create table if not exists indexes (" +
-          "version text primary key on conflict replace, includes text, excludes text)"
       ],
       [
         "create table if not exists scripts (" +
@@ -46,9 +41,9 @@ Store.prototype = {
         callback(false);
       }
     });
-  },
+  }),
 
-  getScriptDetails: function(ids, callback) {
+  getScriptDetails: wrap(function(ids, callback) {
     var fail = this.makeFailHandler_(callback);
     var timer = new Timer();
     this.db_.readTransaction(function(t) {
@@ -73,7 +68,7 @@ Store.prototype = {
         },
         fail);
     });
-  },
+  }),
 
   makeFailHandler_: function(callback) {
     return function(t, e) {
@@ -82,91 +77,70 @@ Store.prototype = {
     }
   },
 
-  readData_: function(callback) {
-    var timer = new Timer();
-
+  getMetaValues_: wrap(function(keys, callback) {
     var fail = this.makeFailHandler_(callback);
-
     var w = new Wrapper(this, callback);
-
-    var get_version = w.wrap(function(t) {
-      t.executeSql(
-        "select value from meta where key = ?",
-        ["current_version"],
-        w.wrap(function(t1, r) {
-          timer.mark("after get version query");
-          if (r.rows.length > 0) {
-            this.current_version_ = r.rows.item(0).value;
-            get_indexes(t1);
-          } else {
-            // todo: start update
-            callback(true);
-          }
-        }),
-        fail);
+    this.db_.readTransaction(function(t) {
+      var list = "'" + keys.join("','") + "'";
+      var sql = "select key, value from meta where key in (" + list + ")";
+      t.executeSql(sql, null, w.wrap(function(t1, r) {
+        var values = {};
+        for (var i = 0; i < r.rows.length; i++) {
+          values[r.rows.item(i).key] = r.rows.item(i).value;
+        }
+        callback(true, values);
+      }), fail);
     });
+  }),
 
-    var get_indexes = w.wrap(function(t) {
-      t.executeSql(
-        "select includes, excludes from indexes where version = ?",
-        [this.current_version_],
-        w.wrap(function(t1, r) {
-          timer.mark("after get indexes query");
-          if (r.rows.length > 0) {
-            var includes_url = r.rows.item(0).includes;
-            var excludes_url = r.rows.item(0).excludes;
-            timer.mark("after read, " + (includes_url.length +
-                                         excludes_url.length) + " bytes");
-            var that = this;
-            var includes_stream = new Stream();
-            var excludes_stream = new Stream();
+  readData_: wrap(function(callback) {
+    var timer = new Timer();
+    var that = this;
+    this.getMetaValues_(["includes", "excludes"], function(success, values) {
+      if ("includes" in values && "excludes" in values) {
+        var includes_stream = new Stream();
+        var excludes_stream = new Stream();
 
-            includes_stream.load(document, includes_url, function() {
-              excludes_stream.load(document, excludes_url, function() {
-                that.includes_ = new IndexReader(includes_stream);
-                that.excludes_ = new IndexReader(excludes_stream);
-                timer.mark("after stream");
-                callback(true);
-              });
-            });
-          } else {
-            this.current_version_ = null;
-            // todo: start update
+        includes_stream.load(document, values["includes"], function() {
+          excludes_stream.load(document, values["excludes"], function() {
+            that.includes_ = new IndexReader(includes_stream);
+            that.excludes_ = new IndexReader(excludes_stream);
+            timer.mark("after stream");
             callback(true);
-          }
-        }),
-        fail);
+          });
+        });
+      } else {
+        // bad read
+        callback(false);
+      }
     });
+  }),
 
-    this.db_.readTransaction(get_version);
-  },
-
-  installNewData: function(version,
-                           includes_stream,
-                           excludes_stream,
-                           scripts_list,
-                           callback) {
+  installNewData: wrap(function(version,
+                                includes_stream,
+                                excludes_stream,
+                                scripts_list,
+                                callback) {
     var stmts = [
-      [
-        "delete from indexes"
-      ],
       [
         "delete from scripts"
       ],
       [
-        "insert into indexes (version, includes, excludes) values (?, ?, ?)",
-        [version,
-         includes_stream.getDataUrl(),
-         excludes_stream.getDataUrl()]
+        "insert into meta (key, value) values (?, ?)",
+        ["version", version]
       ],
       [
         "insert into meta (key, value) values (?, ?)",
-        ["current_version", version]
+        ["includes", includes_stream.getDataUrl()]
+      ],
+      [
+        "insert into meta (key, value) values (?, ?)",
+        ["excludes", excludes_stream.getDataUrl()]
       ]
     ];
 
     function esc(s) {
-      return s.replace(/'/g, "''"); // '
+      return s.replace(/'/g /*'*/, "''");
     }
 
     var list = scripts_list.split(/\n/);
@@ -198,9 +172,9 @@ Store.prototype = {
         callback(success, error);
       }
     });
-  },
+  }),
 
-  executeStatements_: function(stmts, callback) {
+  executeStatements_: wrap(function(stmts, callback) {
     var fail = this.makeFailHandler_(callback);
     var run_text_statement = function(t) {
       chrome.extension.sendRequest({action: "updater-progress",
@@ -214,5 +188,5 @@ Store.prototype = {
     }
 
     this.db_.transaction(run_text_statement);
-  }
+  })
 }
