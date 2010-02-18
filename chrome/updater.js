@@ -1,11 +1,25 @@
 var URL = "http://skrul.com/projects/greasefire/indexes/";
 
-function Updater(store) {
+var TIME_CHECK_INTERVAL = 60 * 1000;
+
+function Updater(store, interval_seconds, next_update_date) {
   this.store_ = store;
+  this.interval_seconds_ = interval_seconds;
+  this.next_update_date_ = next_update_date;
   this.isUpdating_ = false;
+  this.enable_scheduled_updates_ = false;
+  this.startTimer_();
 }
 
 Updater.prototype = {
+  enableScheduledUpdates: function() {
+    this.enable_scheduled_updates_ = true;
+  },
+
+  disableScheduledUpdates: function() {
+    this.enable_scheduled_updates_ = false;
+  },
+
   update: wrap(function(force, callback) {
     if (this.isUpdating_) {
       callback(false, "Already updating");
@@ -110,5 +124,30 @@ Updater.prototype = {
       }
       callback(false, error);
     });
-  })
+  }),
+
+  startTimer_: function() {
+    var that = this;
+    window.setTimeout(function() {
+      that.tick_();
+    }, TIME_CHECK_INTERVAL);
+  },
+
+  tick_: function() {
+    d("tick " + (new Date()));
+    if (this.enable_scheduled_updates_ &&
+        Date.now() >= this.next_update_date_) {
+      var that = this;
+      this.update(false, function(success, error) {
+        if (!success) {
+          d("Error doing scheduled update: " + error);
+        }
+        that.next_update_date_ =
+          Date.now() + (that.interval_seconds_ * 1000);
+        that.startTimer_();
+      });
+    } else {
+      this.startTimer_();
+    }
+  }
 }

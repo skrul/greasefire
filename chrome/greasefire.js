@@ -1,6 +1,6 @@
 function Greasefire() {
   this.store_ = new Store();
-  this.updater_ = new Updater(this.store_);
+  this.updater_ = new Updater(this.store_, 60 * 60, new Date(0));
   this.updated_tabs_ = {};
 }
 
@@ -38,6 +38,9 @@ Greasefire.prototype = {
 
   finishInit_: function(timer) {
     this.updated_tabs_ = {};
+
+    // Start scheduled updates.
+    this.updater_.enableScheduledUpdates();
 
     // Set up listeners.
     chrome.extension.onRequest.addListener(
