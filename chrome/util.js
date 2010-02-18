@@ -26,6 +26,7 @@ function wrap(f) {
     } catch(e) {
       var message = e.message + "\n";
       message += stack().join("\n");
+      console.log(message);
       arguments[arguments.length - 1](false, message);
     }
   }
@@ -84,7 +85,7 @@ function parseISO8601(s) {
 function formatISO8601(d) {
   function pad(s) { return ("0" + s).substr(-2); }
   return d.getUTCFullYear() + "-" +
-    pad(d.getUTCMonth()) + "-" +
+    pad(d.getUTCMonth() + 1) + "-" +
     pad(d.getUTCDate()) + "T" +
     pad(d.getUTCHours()) + ":" +
     pad(d.getUTCMinutes()) + ":" +

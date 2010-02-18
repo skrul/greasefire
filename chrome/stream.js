@@ -16,6 +16,7 @@ Stream.prototype = {
   },
 
   load: wrap(function(document, url, callback) {
+    d("Stream.load " + url);
     var timer = new Timer();
     var image = new Image();
     var that = this;

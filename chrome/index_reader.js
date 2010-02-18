@@ -13,6 +13,8 @@ IndexReader.prototype = {
     if (aDepth > 100)
       return false;
 
+    // todo: check indexpos
+
     var o = this.cache_[aIndexPos];
     if (!o) {
       o = {};

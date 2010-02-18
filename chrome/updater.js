@@ -1,5 +1,4 @@
-var LATEST_URL = "http://skrul.com/projects/greasefire/indexes/latest";
-var URL = "http://skrul.com/projects/greasefire/indexes/2010-01-21T04:31:30Z/";
+var URL = "http://skrul.com/projects/greasefire/indexes/";
 
 function Updater(store) {
   this.store_ = store;
@@ -7,20 +6,54 @@ function Updater(store) {
 }
 
 Updater.prototype = {
-  update: wrap(function(callback) {
-    this.getCurrentVersion_(function(success, date) {
-      console.log(date);
-      console.log(formatISO8601(date));
-      callback(true);
-    });
-    return;
-
+  update: wrap(function(force, callback) {
     if (this.isUpdating_) {
       callback(false, "Already updating");
+      return;
     }
-    this.isUpdating_ = true;
 
     var that = this;
+    this.getVersion_(URL + "latest", function(success, latest_version) {
+      if (!success) {
+        callback(false, "can't read version");
+        return;
+      }
+
+      var current_version = that.store_.current_version();
+      d("latest version " + latest_version);
+      d("current version " + current_version);
+      if (!force && current_version && latest_version <= current_version) {
+        callback(true);
+        return;
+      }
+
+      var base_url = URL + formatISO8601(latest_version);
+      that.updateFromBaseUrl_(base_url, latest_version, callback);
+    });
+  }),
+
+  updateWithLocalData: wrap(function(callback) {
+    if (this.isUpdating_) {
+      callback(false, "Already updating");
+      return;
+    }
+
+    var that = this;
+    this.getVersion_("indexes/latest", function(success, local_version) {
+      if (!success) {
+        callback(false, "can't read local version");
+        return;
+      }
+      d("local version " + local_version);
+      that.updateFromBaseUrl_("indexes", local_version, callback);
+    });
+  }),
+
+  updateFromBaseUrl_: wrap(function(base_url, version, callback) {
+    d("Updater.updateFromBaseUrl_ " + base_url + " " + version);
+
+    var that = this;
+    this.isUpdating_ = true;
     var finish = function(success, error) {
       that.isUpdating_ = false;
       chrome.extension.sendRequest({action: "updater-done"});
@@ -41,9 +74,9 @@ Updater.prototype = {
       if (data) {
         scripts = data;
         that.store_.installNewData(
-          "1234", includes, excludes, scripts, function() {
-          finish(true);
-        });
+          version, includes, excludes, scripts, function() {
+            finish(true);
+          });
       } else {
         finish(false, error);
       }
@@ -54,20 +87,20 @@ Updater.prototype = {
     includes = new Stream();
     excludes = new Stream();
     var total = 0;
-    includes.load(document, URL + "include.png", function() {
+    includes.load(document, base_url + "/include.png", function() {
       total += includes.length();
       on_progress(total, 0);
-      excludes.load(document, URL + "exclude.png", function() {
+      excludes.load(document, base_url + "/exclude.png", function() {
         total += excludes.length();
         on_progress(total, 0);
-        downloader.get(URL + "scripts.txt", done_downloading);
+        downloader.get(base_url + "/scripts.txt", done_downloading);
       });
     });
   }),
 
-  getCurrentVersion_: wrap(function(callback) {
+  getVersion_: wrap(function(url, callback) {
     var downloader = new Downloader();
-    downloader.get(LATEST_URL, function(data, error) {
+    downloader.get(url + "?" + Math.random(), function(data, error) {
       if (data) {
         var d = parseISO8601(data);
         if (d) {

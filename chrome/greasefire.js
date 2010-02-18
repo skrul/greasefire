@@ -13,28 +13,58 @@ Greasefire.prototype = {
     // the indexes with any existing data.
     this.store_.init(function(success, error) {
       timer.mark("store init " + success + " " + error);
-      that.updated_tabs_ = {};
+      if (!success) {
+        d("Error Initializing store: " + error);
+        return;
+      }
 
-      // Set up listeners.
-      chrome.extension.onRequest.addListener(
-        bind(that, "onRequest"));
-      chrome.tabs.onUpdated.addListener(
-        bind(that, "onTabUpdated"));
-      chrome.tabs.onSelectionChanged.addListener(
-        bind(that, "onTabSelectionChanged"));
+      var current_version = that.store_.current_version();
+      d("Store initialized with version " + current_version);
+      if (current_version) {
+        that.finishInit_(timer);
+        return;
+      }
 
-      // Test the selected tab.
-      chrome.tabs.getSelected(null, function(tab) {
-        that.updatePageAction_(tab);
+      // If there is no current data, load the local copy.
+      that.updater_.updateWithLocalData(function(success, error) {
+        if (!success) {
+          d("Could not update with local data: " + error);
+          return;
+        }
+        that.finishInit_(timer);
       });
     });
   },
 
+  finishInit_: function(timer) {
+    this.updated_tabs_ = {};
+
+    // Set up listeners.
+    chrome.extension.onRequest.addListener(
+      bind(this, "onRequest"));
+    chrome.tabs.onUpdated.addListener(
+      bind(this, "onTabUpdated"));
+    chrome.tabs.onSelectionChanged.addListener(
+      bind(this, "onTabSelectionChanged"));
+
+    // Test the selected tab.
+    var that = this;
+    chrome.tabs.getSelected(null, function(tab) {
+      that.updatePageAction_(tab);
+      timer.mark("init complete");
+    });
+  },
+
   onRequest: function(request, sender, sendResponse) {
-    d("onRequest " + request);
+    d("onRequest " + request.action);
     switch(request.action) {
     case "update":
-      this.updateData_(function() {
+      this.updateData_(false, function() {
+        sendResponse({});
+      });
+      break;
+    case "force-update":
+      this.updateData_(true, function() {
         sendResponse({});
       });
       break;
@@ -64,10 +94,10 @@ Greasefire.prototype = {
     }
   },
 
-  updateData_: wrap(function(callback) {
+  updateData_: wrap(function(force, callback) {
     d("updateData");
     var timer = new Timer();
-    this.updater_.update(function() {
+    this.updater_.update(force, function() {
       timer.mark("updated");
     });
     callback();

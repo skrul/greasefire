@@ -14,6 +14,10 @@ Store.prototype = {
     return this.excludes_;
   },
 
+  current_version: function() {
+    return this.current_version_;
+  },
+
   init: wrap(function(callback) {
     d("Store.init");
     this.db_ = openDatabase(
@@ -96,22 +100,31 @@ Store.prototype = {
   readData_: wrap(function(callback) {
     var timer = new Timer();
     var that = this;
-    this.getMetaValues_(["includes", "excludes"], function(success, values) {
-      if ("includes" in values && "excludes" in values) {
+    var keys = ["version", "includes", "excludes"];
+    this.getMetaValues_(keys, function(success, values) {
+      if ("version" in values &&
+          "includes" in values &&
+          "excludes" in values) {
         var includes_stream = new Stream();
         var excludes_stream = new Stream();
 
+        var version = parseISO8601(values["version"]);
+        if (!version) {
+          callback(false, "bad version");
+          return;
+        }
         includes_stream.load(document, values["includes"], function() {
           excludes_stream.load(document, values["excludes"], function() {
             that.includes_ = new IndexReader(includes_stream);
             that.excludes_ = new IndexReader(excludes_stream);
+            that.current_version_ = version;
             timer.mark("after stream");
             callback(true);
           });
         });
       } else {
-        // bad read
-        callback(false);
+        // No local data.
+        callback(true);
       }
     });
   }),
@@ -127,7 +140,7 @@ Store.prototype = {
       ],
       [
         "insert into meta (key, value) values (?, ?)",
-        ["version", version]
+        ["version", formatISO8601(version)]
       ],
       [
         "insert into meta (key, value) values (?, ?)",
@@ -167,6 +180,7 @@ Store.prototype = {
       if (success) {
         that.includes_ = new IndexReader(includes_stream);
         that.excludes_ = new IndexReader(excludes_stream);
+        that.current_version_ = version;
         callback(true);
       } else {
         callback(success, error);

@@ -4,6 +4,10 @@ function do_update() {
   chrome.extension.sendRequest({action: "update"});
 }
 
+function do_force_update() {
+  chrome.extension.sendRequest({action: "force-update"});
+}
+
 function load() {
   throbber = new Throbber(window, document.getElementById("throbber"));
   chrome.extension.onRequest.addListener(
