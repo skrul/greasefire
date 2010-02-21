@@ -1,28 +1,58 @@
 var URL = "http://skrul.com/projects/greasefire/indexes/";
 
 var TIME_CHECK_INTERVAL = 60 * 1000;
+var DAYS_TO_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-function Updater(store, interval_seconds, next_update_date) {
+function Updater(store) {
+  function setIf(key, value) {
+    if (localStorage[key] === undefined) {
+      localStorage[key] = value;
+    }
+  }
+
+  setIf("enable_scheduled_updates", true);
+  setIf("update_interval_ms", DAYS_TO_MILLISECONDS);
+  // Schedule our first update for 30 seconds from now.
+  setIf("next_update_date", Date.now() + (1000 * 30));
+
   this.store_ = store;
-  this.interval_seconds_ = interval_seconds;
-  this.next_update_date_ = next_update_date;
+  this.update_interval_ms_ = parseInt(localStorage["update_interval_ms"]);
+  this.next_update_date_ =
+    new Date(parseInt(localStorage["next_update_date"]));
   this.isUpdating_ = false;
-  this.enable_scheduled_updates_ = false;
-  this.startTimer_();
+  this.enable_scheduled_updates_ =
+    localStorage["enable_scheduled_updates"] == "true";
 }
 
 Updater.prototype = {
-  enableScheduledUpdates: function() {
-    this.enable_scheduled_updates_ = true;
+  startScheduledUpdates: function() {
+    this.startTimer_();
   },
 
-  disableScheduledUpdates: function() {
-    this.enable_scheduled_updates_ = false;
+  enable_scheduled_updates: function() {
+    return this.enable_scheduled_updates_;
   },
 
-  setUpdateSchedule: function(interval_seconds, next_update_date) {
-    this.interval_seconds_ = interval_seconds;
-    this.next_update_date_ = next_update_date;
+  set_enable_scheduled_updates: function(val) {
+    this.enable_scheduled_updates_ = val;
+    localStorage["enable_scheduled_updates"] = val;
+  },
+
+  next_update_date: function() {
+    return this.next_update_date_;
+  },
+
+  notifyStart_: function() {
+    chrome.extension.sendRequest({action: "updater-start"});
+  },
+
+  notifyDone_: function() {
+    chrome.extension.sendRequest({action: "updater-done"});
+  },
+
+  notifyStatus_: function(message) {
+    chrome.extension.sendRequest(
+      {action: "updater-status", message: message});
   },
 
   update: wrap(function(force, callback) {
@@ -32,9 +62,17 @@ Updater.prototype = {
     }
 
     var that = this;
+    this.notifyStart_();
+
+    var finish = function(success, error) {
+      that.scheduleNextUpdate_();
+      that.notifyDone_();
+      callback(success, error);
+    }
+
     this.getVersion_(URL + "latest", function(success, latest_version) {
       if (!success) {
-        callback(false, "can't read version");
+        finish(false, "can't read version");
         return;
       }
 
@@ -42,12 +80,15 @@ Updater.prototype = {
       d("latest version " + latest_version);
       d("current version " + current_version);
       if (!force && current_version && latest_version <= current_version) {
-        callback(true);
+        that.notifyStatus_("Index is up to date.");
+        finish(true);
         return;
       }
 
       var base_url = URL + formatISO8601(latest_version);
-      that.updateFromBaseUrl_(base_url, latest_version, callback);
+      that.updateFromBaseUrl_(base_url, latest_version, function(success, error) {
+        finish(success, error);
+      });
     });
   }),
 
@@ -75,7 +116,6 @@ Updater.prototype = {
     this.isUpdating_ = true;
     var finish = function(success, error) {
       that.isUpdating_ = false;
-      chrome.extension.sendRequest({action: "updater-done"});
       callback(success, error);
     }
 
@@ -94,8 +134,6 @@ Updater.prototype = {
         scripts = data;
         that.store_.installNewData(
           version, includes, excludes, scripts, function() {
-            that.next_update_date_ =
-              Date.now() + (that.interval_seconds_ * 1000);
             finish(true);
           });
       } else {
@@ -103,7 +141,6 @@ Updater.prototype = {
       }
     }
 
-    chrome.extension.sendRequest({action: "updater-start"});
     var downloader = new Downloader(on_progress);
     includes = new Stream();
     excludes = new Stream();
@@ -154,5 +191,10 @@ Updater.prototype = {
     } else {
       this.startTimer_();
     }
+  },
+
+  scheduleNextUpdate_: function() {
+    this.next_update_date_ = new Date(Date.now() + this.update_interval_ms_);
+    localStorage["next_update_date"] = this.next_update_date_.getTime();
   }
 }

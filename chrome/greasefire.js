@@ -1,18 +1,6 @@
 function Greasefire() {
-  if (localStorage["scheduled_updates"] === undefined) {
-    // This is our first time, set up prefs.
-    localStorage["scheduled_updates"] = true;
-    localStorage["update_interval_days"] = 7;
-    // Schedule an update for 30 seconds from now.
-    localStorage["next_update_date"] = formatISO8601(
-      new Date(Date.now() + (1000 * 30)));
-  }
-
   this.store_ = new Store();
-  this.updater_ = new Updater(
-    this.store_,
-    localStorage["update_interval_days"] * DAYS_TO_SECONDS,
-    parseISO8601(localStorage["next_update_date"]));
+  this.updater_ = new Updater(this.store_);
   // What tabs remain to be requeried after an index update.
   this.updated_tabs_ = {};
 }
@@ -54,7 +42,7 @@ Greasefire.prototype = {
     this.updated_tabs_ = {};
 
     // Start scheduled updates.
-    this.updater_.enableScheduledUpdates();
+    this.updater_.startScheduledUpdates();
 
     // Set up listeners.
     chrome.extension.onRequest.addListener(
@@ -98,27 +86,15 @@ Greasefire.prototype = {
     case "get-settings":
       sendResponse({
         script_count: this.store_.script_count(),
-        current_version: formatISO8601(this.store_.current_version()),
-        scheduled_updates: localStorage["scheduled_updates"],
-        update_interval_days: localStorage["update_interval_days"],
-        next_update_date: localStorage["next_update_date"]
+        current_version: this.store_.current_version().getTime(),
+        enable_scheduled_updates: this.updater_.enable_scheduled_updates(),
+        next_update_date: this.updater_.next_update_date().getTime()
       });
       break;
     case "set-settings":
-      if ("scheduled_updates" in request) {
-        localStorage["scheduled_updates"] = request.scheduled_updates;
-        if (request.scheduled_updates) {
-          this.updater_.enableScheduledUpdates();
-        } else {
-          this.updater_.disableScheduledUpdates();
-        }
-      }
-      if ("update_interval_days" in request) {
-        localStorage["update_interval_days"] = request.update_interval_days;
-        localStorage["next_update_date"] = request.next_update_date;
-        this.updater_.setUpdateSchedule(
-          request.update_interval_days * DAYS_TO_SECONDS,
-          parseISO8601(request.next_update_date));
+      if ("enable_scheduled_updates" in request) {
+        this.updater_.set_enable_scheduled_updates(
+          request.enable_scheduled_updates);
       }
       break;
     }
