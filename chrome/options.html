@@ -7,17 +7,39 @@
   background-image: url(throbber.png);
   background-repeat: no-repeat;
 }
+.error {
+  color: #f00;
+} 
 </style>
 <script src="jquery-1.3.2.min.js"></script>
+<script src="util.js"></script>
 <script src="throbber.js"></script>
 <script src="options.js"></script>
 <title>Greasefire Options</title>
 </head>
-<body onload="load();">
-<div id="throbber">
-</div>
-<input type="button" name="update" value="Update" onclick="do_update();">
-<input type="button" name="force_update" value="Force Update" onclick="do_force_update();">
-<input type="text" id="progress" value="">
+<body onload="options.init();">
+<h1>Greasefire Options</h1>
+<p>
+Status: <span id="status">Initializing...</span><span id="throbber"/>
+</p>
+<p>
+Index date: <span id="index_date"/>
+</p>
+<p>
+Script count: <span id="script_count"/>
+</p>
+<p>
+<input type="button" id="update" value="Update" onclick="options.update(false)"/>
+<input type="button" id="force_update" value="Force Update" onclick="options.update(true)"/>
+</p>
+<p>
+<input id="scheduled_updates" type="checkbox"/>Enabled scheduled updates
+</p>
+<p>
+Check for updates every <input type="text" id="update_interval_days"/> days.
+</p>
+<p>
+Next update: <span id="next_update_date"/>
+</p>
 </body>
 </html>

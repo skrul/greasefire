@@ -20,6 +20,11 @@ Updater.prototype = {
     this.enable_scheduled_updates_ = false;
   },
 
+  setUpdateSchedule: function(interval_seconds, next_update_date) {
+    this.interval_seconds_ = interval_seconds;
+    this.next_update_date_ = next_update_date;
+  },
+
   update: wrap(function(force, callback) {
     if (this.isUpdating_) {
       callback(false, "Already updating");
@@ -89,6 +94,8 @@ Updater.prototype = {
         scripts = data;
         that.store_.installNewData(
           version, includes, excludes, scripts, function() {
+            that.next_update_date_ =
+              Date.now() + (that.interval_seconds_ * 1000);
             finish(true);
           });
       } else {
@@ -142,8 +149,6 @@ Updater.prototype = {
         if (!success) {
           d("Error doing scheduled update: " + error);
         }
-        that.next_update_date_ =
-          Date.now() + (that.interval_seconds_ * 1000);
         that.startTimer_();
       });
     } else {

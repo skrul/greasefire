@@ -3,6 +3,7 @@ function Store() {
   this.includes_ = new IndexReader(new Stream());
   this.excludes_ = new IndexReader(new Stream());
   this.current_version_ = null;
+  this.script_count_ = 0;
 }
 
 Store.prototype = {
@@ -16,6 +17,10 @@ Store.prototype = {
 
   current_version: function() {
     return this.current_version_;
+  },
+
+  script_count: function() {
+    return this.script_count_;
   },
 
   init: wrap(function(callback) {
@@ -97,6 +102,17 @@ Store.prototype = {
     });
   }),
 
+  getScriptCount_: wrap(function(callback) {
+    var fail = this.makeFailHandler_(callback);
+    var w = new Wrapper(this, callback);
+    this.db_.readTransaction(function(t) {
+      var sql = "select count(1) as c from scripts";
+      t.executeSql(sql, null, w.wrap(function(t1, r) {
+        callback(true, r.rows.item(0).c);
+      }), fail);
+    });
+  }),
+
   readData_: wrap(function(callback) {
     var timer = new Timer();
     var that = this;
@@ -118,8 +134,16 @@ Store.prototype = {
             that.includes_ = new IndexReader(includes_stream);
             that.excludes_ = new IndexReader(excludes_stream);
             that.current_version_ = version;
-            timer.mark("after stream");
-            callback(true);
+
+            that.getScriptCount_(function(success, count) {
+              if (!success) {
+                callback(false, count);
+                return;
+              }
+              that.script_count_ = count;
+              timer.mark("after stream");
+              callback(true);
+            });
           });
         });
       } else {
@@ -181,6 +205,7 @@ Store.prototype = {
         that.includes_ = new IndexReader(includes_stream);
         that.excludes_ = new IndexReader(excludes_stream);
         that.current_version_ = version;
+        that.script_count_ = list.length;
         callback(true);
       } else {
         callback(success, error);

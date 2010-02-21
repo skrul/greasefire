@@ -1,4 +1,5 @@
 var DEBUG = true;
+var DAYS_TO_SECONDS = 24 * 60 * 60;
 
 function Wrapper(that, callback) {
   this.that_ = that;
@@ -79,6 +80,7 @@ function parseISO8601(s) {
     d.setTime(d.getTime() + offset);
     return d;
   }
+  alert("bad date " + s);
   return null;
 }
 
