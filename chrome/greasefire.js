@@ -97,6 +97,11 @@ Greasefire.prototype = {
           request.enable_scheduled_updates);
       }
       break;
+    case "reset":
+      this.reset_(function() {
+        sendResponse({});
+      });
+      break;
     }
   },
 
@@ -112,6 +117,14 @@ Greasefire.prototype = {
         that.updated_tabs_[tabId] = true;
       });
     }
+  },
+
+  reset_: function(callback) {
+    var that = this;
+    this.store_.reset(function(success) {
+      that.updater_.reset();
+      callback(success);
+    });
   },
 
   updateData_: wrap(function(force, callback) {

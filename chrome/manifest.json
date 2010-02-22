@@ -1,7 +1,7 @@
 {
   "name": "Greasefire",
-  "version": "1.0",
-  "description": "The first extension that I made.",
+  "version": "0.1",
+  "description": "Automatically find user scripts from Userscripts.org",
   "permissions": [
     "tabs",
     "http://*/*",

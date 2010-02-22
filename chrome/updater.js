@@ -22,9 +22,16 @@ function Updater(store) {
   this.isUpdating_ = false;
   this.enable_scheduled_updates_ =
     localStorage["enable_scheduled_updates"] == "true";
+  this.timer_id = null;
 }
 
 Updater.prototype = {
+  reset: function() {
+    delete localStorage["enable_scheduled_updates"];
+    delete localStorage["update_interval_ms"];
+    delete localStorage["next_update_date"];
+  },
+
   startScheduledUpdates: function() {
     this.startTimer_();
   },
@@ -124,9 +131,9 @@ Updater.prototype = {
     var scripts;
 
     var on_progress = function(loaded, total) {
-      chrome.extension.sendRequest({action: "updater-progress",
-                                    loaded: loaded,
-                                    total: total});
+      chrome.extension.sendRequest({
+        action: "updater-status",
+        message: "Downloading indexes (" + loaded + ")"});
     }
 
     var done_downloading = function(data, error) {
@@ -171,8 +178,10 @@ Updater.prototype = {
   }),
 
   startTimer_: function() {
+    if (this.timer_id)
+      return;
     var that = this;
-    window.setTimeout(function() {
+    this.timer_id = window.setTimeout(function() {
       that.tick_();
     }, TIME_CHECK_INTERVAL);
   },

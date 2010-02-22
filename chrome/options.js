@@ -21,6 +21,12 @@ Options.prototype = {
     chrome.extension.sendRequest({action: force ? "force-update" : "update"});
   },
 
+  reset: function() {
+    chrome.extension.sendRequest({action: "reset"}, function(response) {
+      $("#status").html("Settings reset.  Restart the extension.");
+    });
+  },
+
   refresh_: function() {
     chrome.extension.sendRequest({action: "get-settings"}, function(response) {
       if (!this.is_alive_) {

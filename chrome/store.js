@@ -43,13 +43,36 @@ Store.prototype = {
     ];
 
     var that = this;
-    this.executeStatements_(stmts, function(success) {
-      if (success) {
-        that.readData_(callback);
-      } else {
-        callback(false);
-      }
-    });
+    this.executeStatements_(
+      stmts,
+      function(total, current) {
+        chrome.extension.sendRequest({
+          action: "updater-status",
+          message: "Loading schema... (" + current + " of " + total + ")"});
+      },
+      function(success) {
+        if (success) {
+          that.readData_(callback);
+        } else {
+          callback(false);
+        }
+      });
+  }),
+
+  reset: wrap(function(callback) {
+    console.log("store reset");
+    var stmts = [
+      ["drop table if exists meta"],
+      ["drop table if exists scripts"]
+    ];
+    this.executeStatements_(
+      stmts,
+      function(total, current) {
+        chrome.extension.sendRequest({
+          action: "updater-status",
+          message: "Deleting data... (" + current + " of " + total + ")"});
+      },
+      callback);
   }),
 
   getScriptDetails: wrap(function(ids, callback) {
@@ -200,25 +223,34 @@ Store.prototype = {
     }
 
     var that = this;
-    this.executeStatements_(stmts, function(success, error) {
-      if (success) {
-        that.includes_ = new IndexReader(includes_stream);
-        that.excludes_ = new IndexReader(excludes_stream);
-        that.current_version_ = version;
-        that.script_count_ = list.length;
-        callback(true);
-      } else {
-        callback(success, error);
-      }
-    });
+    this.executeStatements_(
+      stmts,
+      function(total, current) {
+        chrome.extension.sendRequest({
+          action: "updater-status",
+          message: "Applying updates... (" + current + " of " + total + ")"});
+      },
+      function(success, error) {
+        if (success) {
+          that.includes_ = new IndexReader(includes_stream);
+          that.excludes_ = new IndexReader(excludes_stream);
+          that.current_version_ = version;
+          that.script_count_ = list.length;
+          callback(true);
+        } else {
+          callback(success, error);
+        }
+      });
   }),
 
-  executeStatements_: wrap(function(stmts, callback) {
+  executeStatements_: wrap(function(stmts, progress, callback) {
     var fail = this.makeFailHandler_(callback);
+    var total = stmts.length;
     var run_text_statement = function(t) {
-      chrome.extension.sendRequest({action: "updater-progress",
-                                    loaded: stmts.length});
       if (stmts.length > 0) {
+        if (progress) {
+          progress(total, stmts.length);
+        }
         var pair = stmts.shift();
         t.executeSql(pair[0], pair[1], run_text_statement, fail);
       } else {
