@@ -75,6 +75,7 @@ public class Generate {
       "http:",
       "http://*blog*",
       "http://**",
+      "*.com*",
       ""
   };
 
