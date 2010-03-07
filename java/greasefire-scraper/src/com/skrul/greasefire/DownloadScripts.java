@@ -17,6 +17,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
+import org.htmlcleaner.XPatherException;
 
 public class DownloadScripts {
 
@@ -45,7 +46,7 @@ public class DownloadScripts {
   }
 
   public void run(File dir, boolean full) {
-
+ 
     HttpClient client = new HttpClient();
     String url = "http://greasefire.userscripts.org/scripts?page=";
     int page = 1;
@@ -68,7 +69,7 @@ public class DownloadScripts {
           if (props.exists() && scriptFile.exists()) {
             FileInputStream fis = new FileInputStream(props);
             p.load(fis);
-            
+
             // TODO: Compute file hash (use file size for now)
             String fileHash = Long.toString(scriptFile.length());
             long updated = Long.parseLong(p.getProperty("updated"));
@@ -85,10 +86,10 @@ public class DownloadScripts {
           }
 
           hasUpdatedScripts = true;
-          
+
           logger.info("page: " + page + " " + script.url + " "
               + script.installs + " " + script.updated);
-                    
+              
           HttpMethod method = new GetMethod("http://greasefire.userscripts.org/scripts/source/" + script.id + ".user.js?greasefire");
           try {
             client.executeMethod(method);
@@ -103,6 +104,9 @@ public class DownloadScripts {
             p.setProperty("posts", Integer.toString(script.posts));
             p.setProperty("updated", Long.toString(script.updated));
             p.setProperty("hash", Long.toString(scriptFile.length()));
+            p.setProperty("description", script.description);
+            p.setProperty("reviews", Integer.toString(script.reviews));
+            p.setProperty("averageReviews", Integer.toString(script.averageReview));
             p.store(new FileOutputStream(props), "");
                     
           } catch (IOException e) {
@@ -150,10 +154,16 @@ public class DownloadScripts {
         }
         TagNode rowNode = (TagNode) row;
         try {
+          String s;
           Script script = new Script();
           String id = rowNode.getAttributeByName("id").replace("scripts-", "");        
           TagNode nameNode = rowNode.getChildTags()[0].getChildTags()[0];
-          String scriptUrl = nameNode.getAttributeByName("href");         
+          String scriptUrl = nameNode.getAttributeByName("href");
+          String description = getText(rowNode, "td[1]/p");
+          s = getText(rowNode, "td[2]/a");
+          int reviews = s == null ? 0 : Integer.parseInt(s.replaceAll("\\D", ""));
+          s = getText(rowNode, "td[2]/span/span[@class='number']");
+          int averageReview = s == null ? 0 : (int) (Float.parseFloat(s) * 1000);
           int posts = Integer.parseInt(rowNode.getChildTags()[2].getText().toString());
           int fans = Integer.parseInt(rowNode.getChildTags()[3].getText().toString());
           int installs = Integer.parseInt(rowNode.getChildTags()[4].getText().toString());
@@ -166,6 +176,9 @@ public class DownloadScripts {
           script.installs = installs;
           script.posts = posts;
           script.fans = fans;
+          script.description = description;
+          script.reviews = reviews;
+          script.averageReview = averageReview;
           scripts.add(script);
         } catch (Exception e) {
           logger.log(Level.SEVERE, "Can't parse row " + rowNode, e);
@@ -177,6 +190,24 @@ public class DownloadScripts {
     return scripts;
   }
 
+  String getText(TagNode node, String xpath) {
+    try {
+      Object[] nodes = node.evaluateXPath(xpath);
+      if (nodes.length != 1) {
+        return null;
+      }
+      if (nodes[0] instanceof TagNode) {
+        return ((TagNode) nodes[0]).getText().toString();
+      }
+      if (nodes[0] instanceof StringBuffer) {
+        return ((StringBuffer) nodes[0]).toString();
+      }
+    } catch (XPatherException e) {
+      logger.log(Level.SEVERE, xpath, e);
+    }
+    return null;
+  }
+  
   class Script {
     String url;
     int installs;
@@ -184,5 +215,9 @@ public class DownloadScripts {
     int fans;
     long updated;
     String id;
+    String description;
+    int rating;
+    int reviews;
+    int averageReview;
   }
 }
