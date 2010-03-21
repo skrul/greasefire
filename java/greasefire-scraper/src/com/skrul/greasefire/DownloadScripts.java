@@ -216,7 +216,6 @@ public class DownloadScripts {
     long updated;
     String id;
     String description;
-    int rating;
     int reviews;
     int averageReview;
   }
