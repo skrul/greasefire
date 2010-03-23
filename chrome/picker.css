@@ -1,0 +1,65 @@
+body {
+  line-height: 1.5;
+  font-family: Helvetica Neue, Arial, Helvetica, sans-serif;
+  color: #333333;
+  font-size: 5em;
+  min-width: 357px;
+  overflow-x: hidden;
+}
+
+p { margin: 0 0 1.5em; }
+
+.la {
+  text-align: left;
+}
+
+thead th { background: #c3d9ff; }
+
+th, td, caption { padding: 4px 10px 4px 5px; }
+
+tr.even td { background: #e5ecf9; }
+
+table {
+  border-collapse: collapse;
+}
+table p {
+  margin: 0.625em 0;
+  line-height: 1.25em;
+}
+table.noborder td {
+  border: 0;
+}
+table.nopad td {
+  padding-left: 0;
+}
+table.wide {
+  width: 100%;
+}
+table tr td.inv {
+  background: #eee;
+}
+table tr td.vat {
+  vertical-align: top;
+}
+table tr td.narrow {
+  padding: 2px 5px;
+}
+table tr td.script-install {
+  width: 16px;
+  padding: 9px 0 0 7px;
+  vertical-align: top;
+  border-right: 0;
+}
+table tr td.script-meat {
+  border-left: 0;
+  padding-left: 7px;
+}
+table tr.unlisted {
+  background: #ffeeee;
+}
+table.forums tr td.c1, table.forums tr td.script-meat { border-right: 0; padding-right: 5px; padding-top: 7px; }
+table.forums tr td.c2 { border-left: 0; padding-left: 5px; }
+
+span.rating { background: url(images/5stars-small-2.png) top left; width: 60px; display: block; height: 12px; }
+span.rating span.number { display: none; }
+span.rating span.stars { background: url(images/5stars-small-2.png) bottom left; display: block; height: 12px; }

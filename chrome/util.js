@@ -30,7 +30,7 @@ function wrap(f) {
       console.log(message);
       arguments[arguments.length - 1](false, message);
     }
-  }
+  };
 }
 
 function Timer() {
@@ -57,7 +57,7 @@ function bind(o, f) {
     if (typeof f == "string")
       f = o[f];
     f.apply(o, arguments);
-  }
+  };
 }
 
 function stack() {
@@ -93,21 +93,3 @@ function formatISO8601(d) {
     pad(d.getUTCMinutes()) + ":" +
     pad(d.getUTCSeconds()) + "Z";
 }
-
-/*
-FUNCTION KLASS() {
-  THIS.VALUE = "world";
-}
-Klass.prototype = {
-  method: wrap(function(callback) {
-    console.log("hello");
-    console.log(this.value);
-    //throw new Error("eek");
-    callback(true);
-  })
-}
-
-
-var k = new Klass();
-k.method(function(success, e) { console.log("callback " + success + " " + e);});
-*/

@@ -79,8 +79,8 @@ Greasefire.prototype = {
         sendResponse({status: status, results: results});
       });
       break;
-    case "install":
-      this.installScript_(request.url);
+    case "navigate":
+      this.navigate_(request.url);
       sendResponse({});
       break;
     case "get-settings":
@@ -158,7 +158,7 @@ Greasefire.prototype = {
     });
   }),
 
-  installScript_: function(url) {
+  navigate_: function(url) {
     chrome.tabs.executeScript(null, {
       code: "window.location = '" + url + "';"
     });

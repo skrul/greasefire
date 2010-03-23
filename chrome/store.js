@@ -29,7 +29,7 @@ Store.prototype = {
       "greasefire",
       "",
       "greasefire",
-      40 * 1024 * 1024);
+      10 * 1024 * 1024);
 
     var stmts = [
       [
@@ -38,7 +38,15 @@ Store.prototype = {
       ],
       [
         "create table if not exists scripts (" +
-          "id int primary key, name text, installs integer, updated integer)"
+          "id int primary key, " +
+          "installs integer, " +
+          "updated integer, " +
+          "fans integer, " +
+          "posts integer, " +
+          "reviews integer, " +
+          "average_reviews integer, " +
+          "name text, " +
+          "description text)"
       ]
     ];
 
@@ -50,12 +58,12 @@ Store.prototype = {
           action: "updater-status",
           message: "Loading schema... (" + current + " of " + total + ")"});
       },
-      function(success) {
-        if (success) {
-          that.readData_(callback);
-        } else {
-          callback(false);
+      function(success, e) {
+        if (!success) {
+          callback(false, e);
+          return;
         }
+        that.readData_(callback);
       });
   }),
 
@@ -79,8 +87,9 @@ Store.prototype = {
     var fail = this.makeFailHandler_(callback);
     var timer = new Timer();
     this.db_.readTransaction(function(t) {
-      var sql = "select id, name, installs, updated from scripts " +
-        "where id in (" + ids.join(",") + ")";
+      var sql = "select id, installs, updated, fans, posts, reviews, " +
+                "average_reviews, name, description from scripts " +
+                "where id in (" + ids.join(",") + ")";
       timer.mark(sql);
       t.executeSql(
         sql,
@@ -90,10 +99,15 @@ Store.prototype = {
           for (var i = 0; i < r.rows.length; i++) {
             var item = r.rows.item(i);
             results[item.id + ""] = {
-              name: item.name,
               installs: item.installs,
-              updated: item.updated
-            }
+              updated: item.updated,
+              fans: item.fans,
+              posts: item.posts,
+              reviews: item.reviews,
+              average_reviews: item.average_reviews,
+              name: item.name,
+              description: item.description
+            };
           }
           timer.mark("query complete, rows = " + r.rows.length);
           callback(true, results);
@@ -106,7 +120,7 @@ Store.prototype = {
     return function(t, e) {
       console.log(e);
       callback(false, e);
-    }
+    };
   },
 
   getMetaValues_: wrap(function(keys, callback) {
@@ -144,14 +158,14 @@ Store.prototype = {
       if ("version" in values &&
           "includes" in values &&
           "excludes" in values) {
-        var includes_stream = new Stream();
-        var excludes_stream = new Stream();
-
         var version = parseISO8601(values["version"]);
         if (!version) {
           callback(false, "bad version");
           return;
         }
+
+        var includes_stream = new Stream();
+        var excludes_stream = new Stream();
         includes_stream.load(document, values["includes"], function() {
           excludes_stream.load(document, values["excludes"], function() {
             that.includes_ = new IndexReader(includes_stream);
@@ -199,26 +213,37 @@ Store.prototype = {
       ]
     ];
 
-    function esc(s) {
+    // de-url encode and sql escape
+    function recode(s) {
+      s = unescape(s.replace(/\+/g, " "));
       return s.replace(/'/g /*'*/, "''");
     }
 
     var list = scripts_list.split(/\n/);
-    var re = /^(\d+) (\d+) (\d+) (.*)$/;
     // See SQLITE_MAX_COMPOUND_SELECT
     var MAX = 500;
     for (var i = 0; i < list.length; i += MAX) {
       var bulk = [];
       for (var j = i; j < i + MAX && j < list.length; j++) {
-        var a = list[j].match(re);
-        if (a) {
-          bulk.push("select " + a[1] +
-                    ", '" + esc(a[4]) +
-                    "', " + a[2] +
-                    ", " + a[3]);
-        }
+        // id & installs & updated & fans & posts & reviews &
+        // averageReviews & name & description
+        var a = list[j].split("&");
+        if (a.length == 9) {
+          bulk.push("select " +
+                    a[0] + "," +  // id
+                    a[1] + "," +  // installs
+                    a[2] + "," +  // updated
+                    a[3] + "," +  // fans
+                    a[4] + "," +  // posts
+                    a[5] + "," +  // reviews
+                    a[6] + "," +  // averageReviews
+                    "'" + recode(a[7]) + "', " +  // name
+                    "'" + recode(a[8]) + "'");  // description
+       }
       }
-      stmts.push(["insert into scripts (id, name, installs, updated) " +
+      stmts.push(["insert into scripts (" +
+                  "id, installs, updated, fans, posts, " +
+                  "reviews, average_reviews, name, description) " +
                   bulk.join(" union ")]);
     }
 
@@ -231,33 +256,35 @@ Store.prototype = {
           message: "Applying updates... (" + current + " of " + total + ")"});
       },
       function(success, error) {
-        if (success) {
-          that.includes_ = new IndexReader(includes_stream);
-          that.excludes_ = new IndexReader(excludes_stream);
-          that.current_version_ = version;
-          that.script_count_ = list.length;
-          callback(true);
-        } else {
-          callback(success, error);
+        if (!success) {
+          callback(false, error);
+          return;
         }
+
+        that.includes_ = new IndexReader(includes_stream);
+        that.excludes_ = new IndexReader(excludes_stream);
+        that.current_version_ = version;
+        that.script_count_ = list.length;
+        callback(true);
       });
   }),
 
   executeStatements_: wrap(function(stmts, progress, callback) {
     var fail = this.makeFailHandler_(callback);
     var total = stmts.length;
-    var run_text_statement = function(t) {
+
+    var run_next_statement = function(t) {
       if (stmts.length > 0) {
         if (progress) {
           progress(total, stmts.length);
         }
         var pair = stmts.shift();
-        t.executeSql(pair[0], pair[1], run_text_statement, fail);
+        t.executeSql(pair[0], pair[1], run_next_statement, fail);
       } else {
         callback(true);
       }
-    }
+    };
 
-    this.db_.transaction(run_text_statement);
+    this.db_.transaction(run_next_statement);
   })
 }

@@ -4,6 +4,7 @@
   "description": "Automatically find user scripts from Userscripts.org",
   "permissions": [
     "tabs",
+    "unlimited_storage",
     "http://*/*",
     "https://*/*"
   ],
@@ -12,6 +13,6 @@
   "page_action": {
     "default_icon": "icon.png",
     "default_title": "Userscripts Available",
-    "popup": "popup.html"
+    "popup": "picker.html"
   }
 }
