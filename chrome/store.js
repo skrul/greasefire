@@ -1,7 +1,7 @@
 function Store() {
   this.db_ = null;
-  this.includes_ = new IndexReader(new Stream());
-  this.excludes_ = new IndexReader(new Stream());
+  this.includes_ = new IndexReader(new BinaryStream(""));
+  this.excludes_ = new IndexReader(new BinaryStream(""));
   this.current_version_ = null;
   this.script_count_ = 0;
 }
