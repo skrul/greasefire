@@ -2,8 +2,6 @@ var HOUR_MS = 1000 * 60 * 60;
 var DAY_MS = HOUR_MS * 24;
 
 $(document).ready(function() {
- 
-
   chrome.tabs.getSelected(null, function(tab) {
     var timer = new Timer();
     timer.mark("start search");
@@ -24,7 +22,7 @@ try {
           }
 
           results.sort(function(a, b) {
-            return b.installs - a.installs;
+            return b.updated - a.updated;
           });
 
           $("#results").pureJSTemplate({
@@ -58,7 +56,7 @@ try {
 function formatDate(d) {
   var age = Date.now() - d.getTime();
   if (age < DAY_MS)
-    return (age / HOUR_MS) + " hours";
+    return Math.floor(age / HOUR_MS) + " hours";
   var month_name = d.toString().split(" ")[1];
   return month_name + " " + d.getDate() + " " + d.getFullYear();
 }

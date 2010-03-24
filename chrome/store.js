@@ -164,24 +164,19 @@ Store.prototype = {
           return;
         }
 
-        var includes_stream = new Stream();
-        var excludes_stream = new Stream();
-        includes_stream.load(document, values["includes"], function() {
-          excludes_stream.load(document, values["excludes"], function() {
-            that.includes_ = new IndexReader(includes_stream);
-            that.excludes_ = new IndexReader(excludes_stream);
-            that.current_version_ = version;
-
-            that.getScriptCount_(function(success, count) {
-              if (!success) {
-                callback(false, count);
-                return;
-              }
-              that.script_count_ = count;
-              timer.mark("after stream");
-              callback(true);
-            });
-          });
+        var includes_stream = new BinaryStream(atob(values["includes"]));
+        var excludes_stream = new BinaryStream(atob(values["excludes"]));
+        that.includes_ = new IndexReader(includes_stream);
+        that.excludes_ = new IndexReader(excludes_stream);
+        that.current_version_ = version;
+        that.getScriptCount_(function(success, count) {
+          if (!success) {
+            callback(false, count);
+            return;
+          }
+          that.script_count_ = count;
+          timer.mark("after stream");
+          callback(true);
         });
       } else {
         // No local data.
@@ -191,8 +186,8 @@ Store.prototype = {
   }),
 
   installNewData: wrap(function(version,
-                                includes_stream,
-                                excludes_stream,
+                                includes_data,
+                                excludes_data,
                                 scripts_list,
                                 callback) {
     var stmts = [
@@ -205,11 +200,11 @@ Store.prototype = {
       ],
       [
         "insert into meta (key, value) values (?, ?)",
-        ["includes", includes_stream.getDataUrl()]
+        ["includes", btoa(includes_data)]
       ],
       [
         "insert into meta (key, value) values (?, ?)",
-        ["excludes", excludes_stream.getDataUrl()]
+        ["excludes", btoa(excludes_data)]
       ]
     ];
 
@@ -261,8 +256,8 @@ Store.prototype = {
           return;
         }
 
-        that.includes_ = new IndexReader(includes_stream);
-        that.excludes_ = new IndexReader(excludes_stream);
+        that.includes_ = new IndexReader(new BinaryStream(includes_data));
+        that.excludes_ = new IndexReader(new BinaryStream(excludes_data));
         that.current_version_ = version;
         that.script_count_ = list.length;
         callback(true);

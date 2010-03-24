@@ -31,7 +31,7 @@ Stream.prototype = {
       that.pos_ = 0;
       timer.mark("stream loaded from '" + url + "', length = " + that.length_);
       callback();
-    }
+    };
     image.src = url;
   }),
 

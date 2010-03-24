@@ -3,7 +3,7 @@ function Downloader(on_progress) {
   this.req_ = null;
   this.callback_ = null;
   this.on_progress_ = on_progress;
-  this.request_listener_ = function(event) { that.onRequestEvent_(event); }
+  this.request_listener_ = function(event) { that.onRequestEvent_(event); };
 }
 
 Downloader.prototype = {

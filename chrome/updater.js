@@ -75,7 +75,7 @@ Updater.prototype = {
       that.scheduleNextUpdate_();
       that.notifyDone_();
       callback(success, error);
-    }
+    };
 
     this.getVersion_(URL + "latest", function(success, latest_version) {
       if (!success) {
@@ -124,7 +124,7 @@ Updater.prototype = {
     var finish = function(success, error) {
       that.isUpdating_ = false;
       callback(success, error);
-    }
+    };
 
     var includes;
     var excludes;
@@ -134,7 +134,7 @@ Updater.prototype = {
       chrome.extension.sendRequest({
         action: "updater-status",
         message: "Downloading indexes (" + loaded + ")"});
-    }
+    };
 
     var done_downloading = function(data, error) {
       if (data) {
@@ -146,19 +146,37 @@ Updater.prototype = {
       } else {
         finish(false, error);
       }
-    }
+    };
 
-    var downloader = new Downloader(on_progress);
-    includes = new Stream();
-    excludes = new Stream();
-    var total = 0;
-    includes.load(document, base_url + "/include.png", function() {
-      total += includes.length();
-      on_progress(total, 0);
-      excludes.load(document, base_url + "/exclude.png", function() {
-        total += excludes.length();
-        on_progress(total, 0);
-        downloader.get(base_url + "/scripts.txt", done_downloading);
+    var includes_dl = new Downloader(on_progress);
+    var excludes_dl = new Downloader(on_progress);
+    var scripts_dl = new Downloader(on_progress);
+    includes_dl.get(base_url + "/include.dat", function(data, status) {
+      if (!data) {
+        finish(false, status);
+        return;
+      }
+      includes = fixEncoding(data);
+
+      excludes_dl.get(base_url + "/exclude.dat", function(data, status) {
+        if (!data) {
+          finish(false, status);
+          return;
+        }
+        excludes = fixEncoding(data);
+
+        scripts_dl.get(base_url + "/scripts.txt", function(data, status) {
+          if (!data) {
+            finish(false, status);
+            return;
+          }
+          scripts = data;
+
+          that.store_.installNewData(
+              version, includes, excludes, scripts, function() {
+            finish(true);
+          });
+        });
       });
     });
   }),

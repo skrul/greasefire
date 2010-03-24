@@ -25,9 +25,9 @@ function wrap(f) {
     try {
       f.apply(this, arguments);
     } catch(e) {
-      var message = e.message + "\n";
-      message += stack().join("\n");
-      console.log(message);
+      var message = "wrap error: " + e;
+      console.log(e);
+      console.log(e.stack);
       arguments[arguments.length - 1](false, message);
     }
   };
@@ -92,4 +92,33 @@ function formatISO8601(d) {
     pad(d.getUTCHours()) + ":" +
     pad(d.getUTCMinutes()) + ":" +
     pad(d.getUTCSeconds()) + "Z";
+}
+
+function fixEncoding(data) {
+  function mask(data) {
+    var a = [];
+    var i  = 0;
+    while (i + 10 < data.length) {
+      a.push(String.fromCharCode(data.charCodeAt(i    ) & 0xff,
+                                 data.charCodeAt(i + 1) & 0xff,
+                                 data.charCodeAt(i + 2) & 0xff,
+                                 data.charCodeAt(i + 3) & 0xff,
+                                 data.charCodeAt(i + 4) & 0xff,
+                                 data.charCodeAt(i + 5) & 0xff,
+                                 data.charCodeAt(i + 6) & 0xff,
+                                 data.charCodeAt(i + 7) & 0xff,
+                                 data.charCodeAt(i + 8) & 0xff,
+                                 data.charCodeAt(i + 9) & 0xff));
+      i += 10;
+    }
+    for (; i < data.length; i++) {
+      a.push(String.fromCharCode(data.charCodeAt(i) & 0xff));
+    }
+    return a.join("");
+  }
+
+  var timer = new Timer();
+  var filtered = data.replace(/[\uf780-\uf7ff]{1,10000}/g, mask);
+  timer.mark("mask " + data.length + " bytes.");
+  return filtered;
 }
