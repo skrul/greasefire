@@ -138,18 +138,24 @@ Greasefire.prototype = {
 
   search_: wrap(function(url, callback) {
     d("search " + url);
-    var matches = {};
     var timer = new Timer();
-    this.store_.includes().search(url, matches, false);
+
+    var excludes = {};
+    this.store_.excludes().search(url, excludes, false);
+    var matches = {};
+    this.store_.includes().search(url, matches, false, excludes);
     var ids = [];
     for (var id in matches) {
       ids.push(id);
     }
+    var that = this;
     this.store_.getScriptDetails(ids, function(status, results) {
       if (status) {
+        // Add matched character count back to the results.
         for (id in results) {
           results[id].matches = matches[id];
         }
+        that.rankResults_(results);
         callback(true, results);
       } else {
         callback(false);
@@ -157,6 +163,58 @@ Greasefire.prototype = {
       timer.mark("search " + url);
     });
   }),
+
+  rankResults_: function(results) {
+    var updated_min = null;
+    var updated_max = null;
+    var average_reviews_min = null;
+    var average_reviews_max = null;
+    var matches_min = null;
+    var matches_max = null;
+
+    for (var id in results) {
+      var result = results[id];
+      if (updated_min == null || result.updated < updated_min) {
+        updated_min = result.updated;
+      }
+      if (updated_max == null || result.updated > updated_max) {
+        updated_max = result.updated;
+      }
+
+      if (average_reviews_min == null ||
+          result.average_reviews < average_reviews_min) {
+        average_reviews_min = result.average_reviews;
+      }
+      if (average_reviews_max == null ||
+          result.average_reviews > average_reviews_max) {
+        average_reviews_max = result.average_reviews;
+      }
+      if (matches_min == null || result.match < matches_min) {
+        matches_min = result.match;
+      }
+      if (matches_max == null || result.match > matches_max) {
+        matches_max = result.match;
+      }
+    }
+
+    var updated_range = updated_max - updated_min;
+    var average_reviews_range = average_reviews_max - average_reviews_min;;
+    var matches_range = matches_max - matches_min;
+
+    for (id in results) {
+      var result = results[id];
+      var updated = updated_range > 0 ?
+          (result.updated - updated_min) / updated_range : 1;
+      var average_reviews = average_reviews_range > 0 ?
+          (result.average_reviews - average_reviews_min) /
+              average_reviews_range : 1;
+      var matches = matches_range > 0 ?
+          (result.matches - matches_min) / matches_range : 1;
+      results[id].rank = (average_reviews * .5) +
+                         (updated * .25) +
+                         (matches * .25);
+    }
+  },
 
   navigate_: function(url) {
     chrome.tabs.executeScript(null, {

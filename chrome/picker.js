@@ -22,7 +22,7 @@ try {
           }
 
           results.sort(function(a, b) {
-            return b.updated - a.updated;
+            return b.rank - a.rank;
           });
 
           $("#results").pureJSTemplate({

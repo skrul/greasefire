@@ -118,7 +118,7 @@ function fixEncoding(data) {
   }
 
   var timer = new Timer();
-  var filtered = data.replace(/[\uf780-\uf7ff]{1,10000}/g, mask);
+  var filtered = data.replace(/[\uf780-\uf7ff]{1,600}/g, mask);
   timer.mark("mask " + data.length + " bytes.");
   return filtered;
 }
