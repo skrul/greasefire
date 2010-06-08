@@ -89,6 +89,8 @@ public class Generate {
       "*.com*",
       "htt*://*.*.*/*",
       "a",
+      "http://*.*.*/",
+      "h*",
       ""
   };
 
