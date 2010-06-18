@@ -56,7 +56,7 @@ Greasefire.prototype = {
     var that = this;
     chrome.tabs.getSelected(null, function(tab) {
       that.updatePageAction_(tab);
-      timer.mark("init complete");
+      timer.done("init complete");
       chrome.extension.sendRequest({action: "initialized"});
     });
   },

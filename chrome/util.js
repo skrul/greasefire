@@ -35,16 +35,25 @@ function wrap(f) {
 
 function Timer() {
   if (!DEBUG) return;
-  this.time_ = (new Date()).getTime();
+  this.start_ = (new Date()).getTime();
+  this.time_ = this.start_;
 }
 Timer.prototype = {
   mark: function(s) {
     if (!DEBUG) return;
     var now = (new Date()).getTime();
-    d(s.substr(0, 1024) + " " + (now - this.time_) + "ms");
+    this.log_(now - this.time_, "MARK: " + s);
     this.time_ = now;
+  },
+  done: function(s) {
+    if (!DEBUG) return;
+    var now = (new Date()).getTime();
+    this.log_(now - this.start_, "DONE: " + s);
+  },
+  log_: function(ms, s) {
+    d(s.substr(0, 1024) + " " + ms + "ms");
   }
-}
+};
 
 function d(s) {
   if (DEBUG) {

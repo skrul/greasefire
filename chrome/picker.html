@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <link href="picker.css" rel="stylesheet" type="text/css" />
@@ -22,6 +23,7 @@
     <#
       for(var i = 0; i < data.results.length; i++) {
         var row = data.results[i];
+        var star_width = Math.floor((row.average_reviews / 1000) * 12);
     #>
     <tr id="scripts-<#=row.id#>">
       <td class="script-meat">
@@ -30,7 +32,7 @@
       </td>
       <td class="inv lp">
         <span class="rating">
-          <span class="stars" style="width: 57px"></span>
+          <span class="stars" style="width: <#=star_width#>px"></span>
           <span class="number"><#=row.average_reviews / 1000#></span>
         </span>
         <a href="/scripts/reviews/<#=row.id#>"><#=row.reviews#> reviews</a>

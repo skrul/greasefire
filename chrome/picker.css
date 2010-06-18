@@ -2,7 +2,7 @@ body {
   line-height: 1.5;
   font-family: Helvetica Neue, Arial, Helvetica, sans-serif;
   color: #333333;
-  font-size: 5em;
+  font-size: 75%;
   min-width: 357px;
   overflow-x: hidden;
 }
@@ -54,12 +54,37 @@ table tr td.script-meat {
   border-left: 0;
   padding-left: 7px;
 }
-table tr.unlisted {
-  background: #ffeeee;
+th {
+  background:none repeat scroll 0 0 #333333;
+  border:1px solid #222222;
+  color:white;
+  font-size:1em;
+  padding:3px 10px;
 }
-table.forums tr td.c1, table.forums tr td.script-meat { border-right: 0; padding-right: 5px; padding-top: 7px; }
-table.forums tr td.c2 { border-left: 0; padding-left: 5px; }
+th a {
+  color:white;
+  font-size:1.1em;
+}
+  th a:hover {
+  color:#FFDD00;
+}
+th a:active {
+  color:#FF8800;
+}
 
-span.rating { background: url(images/5stars-small-2.png) top left; width: 60px; display: block; height: 12px; }
-span.rating span.number { display: none; }
-span.rating span.stars { background: url(images/5stars-small-2.png) bottom left; display: block; height: 12px; }
+
+span.rating {
+  background: url(images/5stars-small-2.png) top left;
+  width: 60px;
+  display: block;
+  height: 12px;
+}
+span.rating span.number {
+  display: none;
+}
+span.rating span.stars {
+  background: url(images/5stars-small-2.png) bottom left;
+  display: block;
+  height: 12px;
+  width: 40px;
+}
