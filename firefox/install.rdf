@@ -9,15 +9,15 @@
 >
 #filter substitution
   <Description about="urn:mozilla:install-manifest">
-    <em:id>@INSTALL_EXTENSION_ID@</em:id>
-    <em:version>@EXTENSION_VERSION@</em:version>
+    <em:id>greasefire@skrul.com</em:id>
+    <em:version>1.0.5</em:version>
 
     <em:targetApplication>
       <!-- Firefox -->
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>@FIREFOX_MINVERSION@</em:minVersion>
-        <em:maxVersion>@FIREFOX_MAXVERSION@</em:maxVersion>
+        <em:minVersion>4.0</em:minVersion>
+        <em:maxVersion>4.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -29,6 +29,7 @@
     <em:iconURL>chrome://greasefire/content/icon_medium.png</em:iconURL>
 
     <em:contributor>Flame images from Foxkeh's Blog (http://www.foxkeh.com)</em:contributor>
-
+    <!-- Need to unpack to access index files -->
+    <em:unpack>true</em:unpack>
   </Description>
 </RDF>
