@@ -39,9 +39,22 @@ var GreasefireController = {
 
     this._updateMenu();
   },
-
+  isFirefox4GM : function() {
+	return document.getElementById("greasemonkey-tbb") != null;
+  },
+  isScriptFish : function(){
+	return document.getElementById("scriptish_general_menu") != null;
+  },
   _setupMenu: function() {
-    var popup = document.getElementById("greasemonkey-tbb").firstChild;
+    var popup = null;
+	if(this.isFirefox4GM()){ //firefox 4
+		popup = document.getElementById("greasemonkey-tbb").firstChild;
+		this._monkey = document.getElementById("greasemonkey-tbb");
+	}else if(this.isScriptFish()){
+		popup = document.getElementById("scriptish-button").firstChild;
+		this._monkey = document.getElementById("scriptish-button");
+	}
+
     popup.insertBefore(document.createElementNS(this._XUL_NS, "menuseparator"),
                        popup.firstChild);
     this._menuItem = document.createElementNS(this._XUL_NS, "menuitem");
@@ -53,7 +66,6 @@ var GreasefireController = {
     this._menuItem.setAttribute("onmouseup",
                                 "GreasefireController.openResults()");
     popup.insertBefore(this._menuItem, popup.firstChild);
-    this._monkey = document.getElementById("greasemonkey-tbb");
   },
 
   _updateMenu: function() {

@@ -79,7 +79,10 @@ var PickerController = {
     var uriSpec = US_BASE + "source/" + info.scriptId + ".user.js";
     var uri = ios.newURI(uriSpec, null, null);
 
-    window.opener.GM_BrowserUI.startInstallScript(uri, false);
+	if(window.opener.GM_BrowserUI)  //for GM
+		window.opener.GM_BrowserUI.startInstallScript(uri, false);
+	else if(window.opener.Scriptish_installUri) //for Scriptish
+		window.opener.Scriptish_installUri(uri, window.opener);
   },
 
   updateFilter: function() {
