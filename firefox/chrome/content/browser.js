@@ -25,7 +25,6 @@ var GreasefireController = {
                   .getService(Ci.gfIGreasefireService);
 
     window.addEventListener("load", this, false);
-    window.addEventListener("unload", this, false);
   },
 
   _newLocation: function(aURI) {
