@@ -44,7 +44,7 @@ var PickerController = {
     this._install = $("install");
 
     this._list = $("list");
-    this._list.className += " pickerlist-ff4";
+    this._list.classList.add("pickerlist-ff4");
     this._view = new ResultsView(this._results);
     this._list.view = this._view;
     this._list.addEventListener("select", this, false);
