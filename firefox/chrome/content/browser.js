@@ -122,22 +122,14 @@ var GreasefireController = {
     if (aEvent.type == "load") {
       this._setupMenu();
 
-      gBrowser.addProgressListener(this,
-                                   Ci.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
+      gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
     }
   },
 
   // nsIWebProgress
-  onLocationChange: function(aProgress, aRequest, aURI)
-  {
+  onLocationChange: function(aProgress, aRequest, aURI) {
     this._newLocation(aURI);
-  },
-
-  onStateChange: function() {},
-  onProgressChange: function() {},
-  onStatusChange: function() {},
-  onSecurityChange: function() {},
-  onLinkIconAvailable: function() {}
+  }
 }
 
 GreasefireController.init();
