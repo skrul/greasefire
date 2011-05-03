@@ -42,7 +42,7 @@ var GreasefireController = {
   isFirefox4GM : function() {
 	return document.getElementById("greasemonkey-tbb") != null;
   },
-  isScriptFish : function(){
+  isScriptish : function(){
 	return document.getElementById("scriptish_general_menu") != null;
   },
   _setupMenu: function() {
@@ -50,7 +50,7 @@ var GreasefireController = {
 	if(this.isFirefox4GM()){ //firefox 4
 		popup = document.getElementById("greasemonkey-tbb").firstChild;
 		this._monkey = document.getElementById("greasemonkey-tbb");
-	}else if(this.isScriptFish()){
+	}else if(this.isScriptish()){
 		popup = document.getElementById("scriptish-button").firstChild;
 		this._monkey = document.getElementById("scriptish-button");
 	}
