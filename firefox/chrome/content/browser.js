@@ -86,16 +86,11 @@ var GreasefireController = {
     this._menuItem.setAttribute("disabled", count == 0 ? "true" : "false");
 
     if (this._monkey) {
-      var classList = this._monkey.className.split(" ");
-      var cssClass = "tbb-scripts-available";
-      classList = classList.filter(function(e) {
-        return e != cssClass;
-      });
-
       if (count > 0) {
-        classList.push(cssClass);
+        this._monkey.classList.add("tbb-scripts-available");
+      } else {
+        this._monkey.classList.remove("tbb-scripts-available");
       }
-      this._monkey.className = classList.join(" ");
     }
   },
 
