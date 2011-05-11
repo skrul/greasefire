@@ -11,3 +11,5 @@ component {d647ff9b-ac4c-4d0e-8fbd-484765be5549} components/gfGreasefireService.
 contract @skrul.com/greasefire/service;1 {d647ff9b-ac4c-4d0e-8fbd-484765be5549}
 category profile-after-change @skrul.com/greasefire/service;1 @skrul.com/greasefire/service;1
 
+overlay    chrome://greasefire/content/prefs.xul chrome://greasefire/content/closewindow.xul
+overlay    chrome://greasefire/content/picker.xul chrome://greasefire/content/closewindow.xul
