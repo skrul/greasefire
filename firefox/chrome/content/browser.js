@@ -16,8 +16,8 @@ var GreasefireController = {
   _menuItem: null,
   _currentResults: null,
   _currentURI: null,
-  _monkey: null,
-
+  _toolbutton: null,
+  _inited: false,
   init: function() {
     this._ios = Cc["@mozilla.org/network/io-service;1"]
                   .getService(Ci.nsIIOService);
@@ -47,12 +47,16 @@ var GreasefireController = {
   _setupMenu: function() {
     var popup = null;
 	if(this.isFirefox4GM()){ //firefox 4
-		popup = document.getElementById("greasemonkey-tbb").firstChild;
-		this._monkey = document.getElementById("greasemonkey-tbb");
+		this._toolbutton = document.getElementById("greasemonkey-tbb");
 	}else if(this.isScriptish()){
-		popup = document.getElementById("scriptish-button").firstChild;
-		this._monkey = document.getElementById("scriptish-button");
+		this._toolbutton = document.getElementById("scriptish-button");
 	}
+	if(!this._toolbutton) //ugithub #8 :for prevening the js error when no greasemonkey or scriptish enabled
+		return false;
+
+	this._inited = true;
+			
+	popup = this._toolbutton.firstChild;	
 
     popup.insertBefore(document.createElementNS(this._XUL_NS, "menuseparator"),
                        popup.firstChild);
@@ -68,6 +72,9 @@ var GreasefireController = {
   },
 
   _updateMenu: function() {
+    if(!this._inited)
+	   return false;
+	
     var count = this._currentResults ? this._currentResults.length : 0;
     var label;
     switch(count) {
@@ -84,11 +91,11 @@ var GreasefireController = {
     this._menuItem.setAttribute("label", label);
     this._menuItem.setAttribute("disabled", count == 0 ? "true" : "false");
 
-    if (this._monkey) {
+    if (this._toolbutton) {
       if (count > 0) {
-        this._monkey.classList.add("tbb-scripts-available");
+        this._toolbutton.classList.add("tbb-scripts-available");
       } else {
-        this._monkey.classList.remove("tbb-scripts-available");
+        this._toolbutton.classList.remove("tbb-scripts-available");
       }
     }
   },
