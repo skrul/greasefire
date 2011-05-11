@@ -123,7 +123,7 @@ var GreasefireController = {
     if (aEvent.type == "load") {
       this._setupMenu();
 
-      gBrowser.addProgressListener(this, Ci.nsIWebProgress.NOTIFY_LOCATION);
+      gBrowser.addProgressListener(this);
     }
   },
 
