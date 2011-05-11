@@ -8,6 +8,7 @@ const Cr = Components.results;
 
 Components.utils.import("resource://gre/modules/ISO8601DateUtils.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 const DEBUG = false;
 
@@ -49,10 +50,7 @@ function gfGreasefireService()
   this._scriptCount = null;
   this._indexDate = Date.now();
 
-  var obs = Cc["@mozilla.org/observer-service;1"]
-              .getService(Ci.nsIObserverService);
-  obs.addObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID, false);
-  obs.addObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID, false);
+  Services.obs.addObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID, false);
 }
 
 gfGreasefireService.prototype = {
@@ -319,10 +317,8 @@ function gfGreasefireService_observe(aSubject, aTopic, aData)
   }
   else if (aTopic == NS_PROFILE_SHUTDOWN_OBSERVER_ID) {
     this.shutdown();
-    var obs = Cc["@mozilla.org/observer-service;1"]
-                .getService(Ci.nsIObserverService);
-    obs.removeObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID);
-    obs.removeObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID);
+    Services.obs.removeObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID);
+    Services.obs.removeObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID);
   }
 }
 

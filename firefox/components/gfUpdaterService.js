@@ -19,6 +19,7 @@ const UPDATE_URL = "http://skrul.com/projects/greasefire/update.php";
 const JARFILES = ["include.dat", "exclude.dat", "scripts.db", "info.ini"];
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 
 function TRYIGNORE(aFunc) {
@@ -49,10 +50,7 @@ function gfUpdaterService() {
   this._wbp = null;
   this._timer = null;
 
-  var obs = Cc["@mozilla.org/observer-service;1"]
-              .getService(Ci.nsIObserverService);
-  obs.addObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID, false);
-  obs.addObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID, false);
+  Services.obs.addObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID, false);
 }
 
 gfUpdaterService.prototype = {
@@ -411,10 +409,8 @@ function gfUpdaterService_observe(aSubject, aTopic, aData)
   }
   else if (aTopic == NS_PROFILE_SHUTDOWN_OBSERVER_ID) {
     this._shutdown();
-    var obs = Cc["@mozilla.org/observer-service;1"]
-                .getService(Ci.nsIObserverService);
-    obs.removeObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID);
-    obs.removeObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID);
+    Services.obs.removeObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID);
+    Services.obs.removeObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID);
   }
 }
 
