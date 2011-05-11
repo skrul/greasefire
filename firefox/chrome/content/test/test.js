@@ -2,16 +2,15 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://gre/modules/Services.jsm");
 
 var bis;
 var seekable;
 var cache = [];
 
 function runTest() {
-
   var method = 2;
 
   var urls = [
@@ -33,25 +32,23 @@ function runTest() {
     file.initWithPath("/home/steve/dev/greasefire/index.dat");
 
     var fis = Cc["@mozilla.org/network/file-input-stream;1"]
-    .createInstance(Ci.nsIFileInputStream);
+                 .createInstance(Ci.nsIFileInputStream);
     fis.init(file, -1, 0, 0);
     var buffer = Cc["@mozilla.org/network/buffered-input-stream;1"]
-    .createInstance(Ci.nsIBufferedInputStream);
+                    .createInstance(Ci.nsIBufferedInputStream);
     buffer.init(fis, 4096);
 
     bis = Cc["@mozilla.org/binaryinputstream;1"]
-    .createInstance(Ci.nsIBinaryInputStream);
+             .createInstance(Ci.nsIBinaryInputStream);
     bis.setInputStream(buffer);
 
     //  var junk = [];
     //  bis.readByteArray(file.fileSize, junk, {});
 
     seekable = buffer.QueryInterface(Ci.nsISeekableStream);
-  }
-  else {
-    var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
-    .getService(Ci.mozIJSSubScriptLoader);
-    loader.loadSubScript("file:///home/steve/dev/greasefire/index.json", o);
+  } else {
+    Services.scriptloader
+        .loadSubScript("file:///home/steve/dev/greasefire/index.json", o);
   }
 
   var d = Date.now() - t;
@@ -61,10 +58,15 @@ function runTest() {
     var matches = [];
     var t = Date.now();
     switch (method) {
-    case 1: find1(urls[i], 0, 0, matches); break
-    case 2: find2(urls[i], 0, 0, matches); break;
-    case 3: find3(o.data, urls[i], 0, matches); break;
-
+      case 1:
+        find1(urls[i], 0, 0, matches);
+        break;
+      case 2:
+        find2(urls[i], 0, 0, matches);
+        break;
+      case 3:
+        find3(o.data, urls[i], 0, matches);
+        break;
     }
     var d = Date.now() - t;
 
@@ -84,7 +86,6 @@ function runTest() {
 }
 
 function find1(url, indexPos, stringPos, matches) {
-
   seekable.seek(Ci.nsISeekableStream.NS_SEEK_SET, indexPos);
 
   var idsLength = bis.read64();
@@ -106,8 +107,7 @@ function find1(url, indexPos, stringPos, matches) {
         find1(url, pos, j, matches);
         seekable.seek(Ci.nsISeekableStream.NS_SEEK_SET, tell);
       }
-    }
-    else if (url.charAt(stringPos) == c) {
+    } else if (c == url.charAt(stringPos)) {
       var tell = seekable.tell();
       find1(url, pos, stringPos + 1, matches);
       seekable.seek(Ci.nsISeekableStream.NS_SEEK_SET, tell);
@@ -116,7 +116,6 @@ function find1(url, indexPos, stringPos, matches) {
 }
 
 function find2(url, indexPos, stringPos, matches) {
-
   var o = cache[indexPos];
   if (!o) {
     o = {};
@@ -163,11 +162,9 @@ function find2(url, indexPos, stringPos, matches) {
       find2(url, wildPos, i, matches);
     }
   }
-
 }
 
 function find3(data, url, stringPos, matches) {
-
   var ids = data[" "];
   if (ids) {
     for (var i = 0; i < ids.length; i++) {
@@ -190,5 +187,4 @@ function find3(data, url, stringPos, matches) {
       find3(wild, url, i, matches);
     }
   }
-
 }

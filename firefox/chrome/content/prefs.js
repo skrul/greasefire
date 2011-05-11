@@ -2,16 +2,11 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, results: Cr} = Components;
 
-function $(id) {
-  return document.getElementById(id);
-}
+function $(id) document.getElementById(id);
 
 var PrefsController = {
-
   _gfs: null,
   _up: null,
 
@@ -34,8 +29,7 @@ var PrefsController = {
   update: function() {
     if (this._up.isUpdating) {
       this._up.cancelUpdate();
-    }
-    else {
+    } else {
       this._up.startUpdate(false);
     }
   },
@@ -56,8 +50,7 @@ var PrefsController = {
         $("days").value = 1;
       }
       this.updateInterval(d);
-    }
-    else {
+    } else {
       this._up.updateIntervalMinutes = 0;
     }
     this._updateDisplay();
@@ -69,20 +62,20 @@ var PrefsController = {
   },
 
   onUpdateFinished: function (aStatus, aMessage) {
-
-    if (aStatus == Cr.NS_OK) {
-      $("status").value = "Update complete!";
-    }
-    else if (aStatus == Cr.NS_BINDING_ABORTED) {
-      $("status").value = "Update cancelled";
-      $("progress").value = 0;
-    }
-    else if (aStatus == Cr.NS_ERROR_FILE_ALREADY_EXISTS) {
-      $("status").value = "Already up to date.";
-      $("progress").value = 0;
-    }
-    else {
-      $("status").value = "Error updating: " + aMessage;
+    switch (aStatus) {
+      case Cr.NS_OK:
+        $("status").value = "Update complete!";
+        break;
+      case Cr.NS_BINDING_ABORTED:
+        $("status").value = "Update cancelled";
+        $("progress").value = 0;
+        break;
+      case Cr.NS_ERROR_FILE_ALREADY_EXISTS:
+        $("status").value = "Already up to date.";
+        $("progress").value = 0;
+        break;
+      default:
+        $("status").value = "Error updating: " + aMessage;
     }
 
     this._updateDisplay();
@@ -93,9 +86,9 @@ var PrefsController = {
 
     if (aCurrentBytes == aTotalBytes) {
       $("status").value = "Extracting new index...";
-    }
-    else {
-      $("status").value = "Downloading " + aCurrentBytes + " of " + aTotalBytes + " bytes";
+    } else {
+      $("status").value =
+          "Downloading " + aCurrentBytes + " of " + aTotalBytes + " bytes";
     }
   },
 
@@ -104,10 +97,10 @@ var PrefsController = {
     $("script-count").value = this._gfs.scriptCount;
 
     if (this._up.updateIntervalMinutes > 0) {
-      $("next-update").value = (new Date(this._up.nextUpdateDate)).toLocaleString();
+      $("next-update").value =
+          (new Date(this._up.nextUpdateDate)).toLocaleString();
       $("auto").checked = true;
-    }
-    else {
+    } else {
       $("next-update").value = "n/a";
       $("auto").checked = false;
     }
@@ -116,8 +109,7 @@ var PrefsController = {
       $("update-button").label = "Cancel update";
       $("progress-box").hidden = false;
       $("throbber").hidden = false;
-    }
-    else {
+    } else {
       $("update-button").label = "Update now";
       $("throbber").hidden = true;
     }
@@ -127,7 +119,7 @@ var PrefsController = {
     if (!aIID.equals(Ci.nsISupports) &&
         !aIID.equals(Ci.gfIUpdateListener) &&
         !aIID.equals(Ci.nsIDOMEventListener))
-      throw Components.results.NS_ERROR_NO_INTERFACE;
+      throw Cr.NS_ERROR_NO_INTERFACE;
 
     return this;
   }

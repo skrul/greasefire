@@ -2,10 +2,7 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 function GF_Trim(s) {
   return s.replace(/^\s\s*/, "").replace(/\s\s*$/, "");
@@ -13,18 +10,15 @@ function GF_Trim(s) {
 
 const US_BASE = "http://greasefire.userscripts.org/scripts/";
 
-function $(id) {
-  return document.getElementById(id);
-}
+function $(id) document.getElementById(id);
 
 function getWebProgress(aIframe) {
   var wp = aIframe.docShell.QueryInterface(Ci.nsIInterfaceRequestor)
-               .getInterface(Ci.nsIWebProgress);
+      .getInterface(Ci.nsIWebProgress);
   return wp;
 }
 
 var PickerController = {
-
   _list: null,
   _info: null,
   _source: null,
@@ -34,7 +28,6 @@ var PickerController = {
   _busyCount: 0,
 
   init: function PickerController_init() {
-
     var params = window.arguments[0].QueryInterface(Ci.nsIDialogParamBlock);
     this._results = params.objects.queryElementAt(0, Ci.nsIArray);
     var uri = params.objects.queryElementAt(1, Ci.nsIURI);
@@ -69,20 +62,16 @@ var PickerController = {
   },
 
   installSelected: function () {
-
     var index = this._list.view.selection.currentIndex;
     var info = this._view.getInfo(index);
 
-    var ios = Cc["@mozilla.org/network/io-service;1"]
-                .getService(Ci.nsIIOService);
-
     var uriSpec = US_BASE + "source/" + info.scriptId + ".user.js";
-    var uri = ios.newURI(uriSpec, null, null);
+    var uri = Services.io.newURI(uriSpec, null, null);
 
-	if(window.opener.GM_BrowserUI)  //for GM
-		window.opener.GM_BrowserUI.startInstallScript(uri, false);
-	else if(window.opener.Scriptish_installUri) //for Scriptish
-		window.opener.Scriptish_installUri(uri, window.opener);
+    if(window.opener.GM_BrowserUI)  //for GM
+      window.opener.GM_BrowserUI.startInstallScript(uri, false);
+    else if(window.opener.Scriptish_installUri) //for Scriptish
+      window.opener.Scriptish_installUri(uri, window.opener);
   },
 
   updateFilter: function() {
@@ -114,11 +103,8 @@ var PickerController = {
         aEvent.preventDefault();
         var href = target.getAttribute("href");
 
-        var ios = Cc["@mozilla.org/network/io-service;1"]
-                    .getService(Ci.nsIIOService);
-
         if (target.className == "userjs") {
-          var uri = ios.newURI(href, null, null);
+          var uri = Services.io.newURI(href, null, null);
           window.opener.GM_BrowserUI.startInstallScript(uri, false);
           return false;
         }
@@ -128,7 +114,7 @@ var PickerController = {
         var currentUrl = $("url").value;
         currentUrl = currentUrl.replace("http://greasefire.", "http://");
 
-        var url = ios.newURI(currentUrl, null, null);
+        var url = Services.io.newURI(currentUrl, null, null);
         var absolute = url.resolve(href);
 
         // Append source=greasefire so we can track clicks back to the
@@ -139,7 +125,6 @@ var PickerController = {
         return false;
       }
     }
-
   },
 
   _scriptSelected: function (aInfo) {
@@ -183,7 +168,6 @@ var PickerController = {
 
   // nsIWebProgressListener
   onStateChange: function (aWebProgress, aRequest,  aStateFlags, aStatus) {
-
     if (aStateFlags & Ci.nsIWebProgressListener.STATE_START) {
       this._busyCount++;
     }
@@ -208,7 +192,6 @@ var PickerController = {
 }
 
 function ResultsView(aResults) {
-
   this._a = [];
   this._view = [];
   for (var i = 0; i < aResults.length; i++) {
@@ -227,12 +210,8 @@ ResultsView.prototype = {
     scriptname: true,
     scriptrank: false
   },
-  getInfo: function (row) {
-    return this._a[this._view[row]];
-  },
-  get rowCount() {
-    return this._view.length;
-  },
+  getInfo: function (row) this._a[this._view[row]],
+  get rowCount() this._view.length,
   getCellText: function (row, column) {
     var result = this._a[this._view[row]];
     switch(column.id) {
@@ -244,12 +223,8 @@ ResultsView.prototype = {
       case "scriptrank":     return result.rank;
     }
   },
-  getCellValue: function (row, column) {
-    return this._a[this._view[row]].rank * 100;
-  },
-  getProgressMode: function (row, column) {
-    return Ci.nsITreeView.PROGRESS_NORMAL;
-  },
+  getCellValue: function (row, column) this._a[this._view[row]].rank * 100,
+  getProgressMode: function (row, column) Ci.nsITreeView.PROGRESS_NORMAL,
   cycleHeader: function (column) {
     var dir = this._sorts[column.id];
     this._sorts[column.id] = !dir;
@@ -264,8 +239,7 @@ ResultsView.prototype = {
       for (var i = 0; i < this._a.length; i++) {
         this._view.push(i);
       }
-    }
-    else {
+    } else {
       this._a.forEach(function (e, idx) {
         for (var i = 0; i < filter.length; i++) {
           if (e.name.toLowerCase().indexOf(filter[i]) < 0) {
@@ -281,13 +255,11 @@ ResultsView.prototype = {
       this._treebox.rowCountChanged(0, this._view.length - oldLength);
       this._sort();
       this._selection.select(0);
-    }
-    finally {
+    } finally {
       this._treebox.endUpdateBatch();
     }
   },
   _sort: function () {
-
     var colId = this._currentSort;
     var direction = this._sorts[colId];
 
@@ -317,9 +289,7 @@ ResultsView.prototype = {
 
     this._view.sort(cmp);
   },
-  get selection() {
-    return this._selection;
-  },
+  get selection() this._selection,
   set selection(selection) {
     this._selection = selection;
   },
