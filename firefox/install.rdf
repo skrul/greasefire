@@ -29,6 +29,8 @@
     <em:iconURL>chrome://greasefire/content/icon_medium.png</em:iconURL>
 
     <em:contributor>Flame images from Foxkeh's Blog (http://www.foxkeh.com)</em:contributor>
+    <em:contributor>Erik Vold (http://erikvold.com)</em:contributor>
+
     <!-- Need to unpack to access index files -->
     <em:unpack>true</em:unpack>
   </Description>
