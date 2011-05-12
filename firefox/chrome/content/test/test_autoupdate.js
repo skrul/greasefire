@@ -2,14 +2,12 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://gre/modules/Services.jsm");
 
 function runTest() {
-
-  var tm = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager);
-  var mainThread = tm.mainThread;
+  var mainThread = Services.tm.mainThread;
 
   var gfs = Cc["@skrul.com/greasefire/service;1"]
               .getService(Ci.gfIGreasefireService);
@@ -50,11 +48,4 @@ function runTest() {
   }
 
   return true;
-}
-
-function newUri(spec) {
-  var ioService = Cc["@mozilla.org/network/io-service;1"].
-                  getService(Ci.nsIIOService);
-
-  return ioService.newURI(spec, null, null);
 }

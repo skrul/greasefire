@@ -2,9 +2,9 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://gre/modules/Services.jsm");
 
 var bis;
 var seekable;
@@ -49,9 +49,8 @@ function runTest() {
     seekable = buffer.QueryInterface(Ci.nsISeekableStream);
   }
   else {
-    var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
-    .getService(Ci.mozIJSSubScriptLoader);
-    loader.loadSubScript("file:///home/steve/dev/greasefire/index.json", o);
+    Services.scriptloader
+        .loadSubScript("file:///home/steve/dev/greasefire/index.json", o);
   }
 
   var d = Date.now() - t;
