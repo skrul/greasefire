@@ -2,10 +2,9 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://gre/modules/Services.jsm");
 
 function GF_Trim(s) {
   return s.replace(/^\s\s*/, "").replace(/\s\s*$/, "");
@@ -73,11 +72,8 @@ var PickerController = {
     var index = this._list.view.selection.currentIndex;
     var info = this._view.getInfo(index);
 
-    var ios = Cc["@mozilla.org/network/io-service;1"]
-                .getService(Ci.nsIIOService);
-
     var uriSpec = US_BASE + "source/" + info.scriptId + ".user.js";
-    var uri = ios.newURI(uriSpec, null, null);
+    var uri = Services.io.newURI(uriSpec, null, null);
 
 	if(window.opener.GM_BrowserUI)  //for GM
 		window.opener.GM_BrowserUI.startInstallScript(uri, false);
@@ -114,11 +110,8 @@ var PickerController = {
         aEvent.preventDefault();
         var href = target.getAttribute("href");
 
-        var ios = Cc["@mozilla.org/network/io-service;1"]
-                    .getService(Ci.nsIIOService);
-
         if (target.className == "userjs") {
-          var uri = ios.newURI(href, null, null);
+          var uri = Services.io.newURI(href, null, null);
           window.opener.GM_BrowserUI.startInstallScript(uri, false);
           return false;
         }
@@ -128,7 +121,7 @@ var PickerController = {
         var currentUrl = $("url").value;
         currentUrl = currentUrl.replace("http://greasefire.", "http://");
 
-        var url = ios.newURI(currentUrl, null, null);
+        var url = Services.io.newURI(currentUrl, null, null);
         var absolute = url.resolve(href);
 
         // Append source=greasefire so we can track clicks back to the
