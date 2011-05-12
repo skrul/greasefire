@@ -2,52 +2,43 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu} = Components;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function d(s) {
   dump("gfTestHarnessCommandLineHandler: " + s + "\n");
 }
 
-function gfTestHarnessRunEnvironment() {
-}
+function gfTestHarnessRunEnvironment() {}
 
 gfTestHarnessRunEnvironment.prototype.log =
-function gfTestHarnessRunEnvironment_log(s)
-{
+    function gfTestHarnessRunEnvironment_log(s) {
   dump("[log] " + s + "\n");
 }
 
 gfTestHarnessRunEnvironment.prototype.newURI =
-function gfTestHarnessRunEnvironment_newURI(aSpec)
-{
-  var ios = Components.classes["@mozilla.org/network/io-service;1"]
-                      .getService(Components.interfaces.nsIIOService);
-  return ios.newURI(aSpec, null, null);
+    function gfTestHarnessRunEnvironment_newURI(aSpec) {
+  return Services.io.newURI(aSpec, null, null);
 }
 
 gfTestHarnessRunEnvironment.prototype.assertEqual =
-function gfTestHarnessRunEnvironment_assertEqual(a, b)
-{
+    function gfTestHarnessRunEnvironment_assertEqual(a, b) {
   if (a != b) {
     this.error("Values are not equal, '" + a + "' != '" + b + "'");
   }
 }
 
 gfTestHarnessRunEnvironment.prototype.assertTrue =
-function gfTestHarnessRunEnvironment_assertTrue(a)
-{
+    function gfTestHarnessRunEnvironment_assertTrue(a) {
   if (!a) {
     this.error("Value is not true");
   }
 }
 
 gfTestHarnessRunEnvironment.prototype.error =
-function gfTestHarnessRunEnvironment_error(aMessage)
-{
+    function gfTestHarnessRunEnvironment_error(aMessage) {
   this.log("ERROR: " + aMessage);
   var stack = Components.stack;
   while (stack) {
@@ -57,9 +48,7 @@ function gfTestHarnessRunEnvironment_error(aMessage)
   throw Cr.NS_ERROR_ILLEGAL_VALUE;
 }
 
-function gfTestHarnessCommandLineHandler()
-{
-}
+function gfTestHarnessCommandLineHandler() {}
 
 gfTestHarnessCommandLineHandler.prototype = {
   classDescription: "Test Harness Command Line Handler",
@@ -68,22 +57,19 @@ gfTestHarnessCommandLineHandler.prototype = {
 }
 
 gfTestHarnessCommandLineHandler.prototype.handle =
-function gfTestHarnessCommandLineHandler_handle(aCommandLine)
-{
+    function gfTestHarnessCommandLineHandler_handle(aCommandLine) {
   var testPath;
   try {
     testPath = aCommandLine.handleFlagWithParam("test", true);
   }
-  catch(e) {
-  }
+  catch(e) {}
 
   if (testPath) {
     aCommandLine.preventDefault = true;
     var shouldQuit = this._runTest(testPath);
     if (shouldQuit) {
       aCommandLine.preventDefault = true;
-    }
-    else {
+    } else {
 //      var appStartup = Cc["@mozilla.org/toolkit/app-startup;1"]
 //                         .getService(Ci.nsIAppStartup);
 //      appStartup.run();
@@ -92,16 +78,11 @@ function gfTestHarnessCommandLineHandler_handle(aCommandLine)
 }
 
 gfTestHarnessCommandLineHandler.prototype._runTest =
-function gfTestHarnessCommandLineHandler__runTest(aPath)
-{
-  var consoleService = Cc["@mozilla.org/consoleservice;1"]
-                         .getService(Ci.nsIConsoleService);
+    function gfTestHarnessCommandLineHandler__runTest(aPath) {
+  var consoleService = Services.console;
   var consoleListener = Cc["@skrul.com/greasefire/testharness/consolelistener;1"]
-                          .createInstance(Ci.nsIConsoleListener);
+      .createInstance(Ci.nsIConsoleListener);
   consoleService.registerListener(consoleListener);
-
-  var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
-                 .getService(Ci.mozIJSSubScriptLoader);
 
   var o = new gfTestHarnessRunEnvironment();
   var shouldQuit = true;
@@ -110,7 +91,7 @@ function gfTestHarnessCommandLineHandler__runTest(aPath)
   consoleService.logStringMessage("Running test at '" + url + "'");
 
   try {
-    loader.loadSubScript(url, o);
+    Services.scriptloader.loadSubScript(url, o);
     shouldQuit = !o.runTest();
     consoleService.logStringMessage("PASSED");
   }
@@ -128,14 +109,11 @@ function gfTestHarnessCommandLineHandler__runTest(aPath)
 }
 
 gfTestHarnessCommandLineHandler.prototype.__defineGetter__("helpinfo",
-function gfTestHarnessCommandLineHandler_helpinfo()
-{
+    function gfTestHarnessCommandLineHandler_helpinfo() {
   return "Halp!";
 });
 
-function gfTestHarnessConsoleListener()
-{
-}
+function gfTestHarnessConsoleListener() {}
 
 gfTestHarnessConsoleListener.prototype = {
   classDescription: "Test Harness Console Listener",
@@ -155,10 +133,10 @@ function HEX(n) {
 }
 
 gfTestHarnessCommandLineHandler.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.nsICommandLineHandler]);
+    XPCOMUtils.generateQI([Ci.nsICommandLineHandler]);
 
 gfTestHarnessConsoleListener.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.nsIConsoleListener]);
+    XPCOMUtils.generateQI([Ci.nsIConsoleListener]);
 
 var NSGetModule = XPCOMUtils.generateNSGetModule(
   [
@@ -174,4 +152,3 @@ var NSGetModule = XPCOMUtils.generateNSGetModule(
       true);
   }
 );
-

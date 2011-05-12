@@ -8,7 +8,6 @@ if(!("Ci" in window))
   window.Ci = Components.interfaces;
 
 var GreasefireController = {
-
   _XUL_NS: "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
   _ios: null,
   _gfs: null,
@@ -31,35 +30,38 @@ var GreasefireController = {
     this._currentURI = aURI;
     if (aURI) {
       this._currentResults = this._gfs.search(aURI);
-    }
-    else {
+    } else {
       this._currentResults = null;
     }
 
     this._updateMenu();
   },
   isFirefox4GM : function() {
-	return document.getElementById("greasemonkey-tbb") != null;
+    return document.getElementById("greasemonkey-tbb") != null;
   },
-  isScriptish : function(){
-	return document.getElementById("scriptish_general_menu") != null;
+  isScriptish : function() {
+    return document.getElementById("scriptish_general_menu") != null;
   },
   _setupMenu: function() {
     var popup = null;
-	if(this.isFirefox4GM()){ //firefox 4
-		this._toolbutton = document.getElementById("greasemonkey-tbb");
-	}else if(this.isScriptish()){
-		this._toolbutton = document.getElementById("scriptish-button");
-	}
-	if(!this._toolbutton) //ugithub #8 :for prevening the js error when no greasemonkey or scriptish enabled
-		return false;
 
-	this._inited = true;
-			
-	popup = this._toolbutton.firstChild;	
+    // Firefox 4
+    if (this.isFirefox4GM()) {
+      this._toolbutton = document.getElementById("greasemonkey-tbb");
+    } else if (this.isScriptish()) {
+      this._toolbutton = document.getElementById("scriptish-button");
+    }
 
+    // github #8: Prevent the JS error when neither GM/Scriptish are enabled
+    if (!this._toolbutton)
+      return false;
+
+    this._inited = true;
+        
+    popup = this._toolbutton.firstChild;	
     popup.insertBefore(document.createElementNS(this._XUL_NS, "menuseparator"),
                        popup.firstChild);
+
     this._menuItem = document.createElementNS(this._XUL_NS, "menuitem");
     // Use "onmouseup" here to trigger the picker window.  This was previously
     // "oncommand" but this caused a strange bug (only on windows) where right
@@ -78,14 +80,14 @@ var GreasefireController = {
     var count = this._currentResults ? this._currentResults.length : 0;
     var label;
     switch(count) {
-    case 0:
-      label = "No scripts available";
-      break;
-    case 1:
-      label = "1 script available";
-      break;
-    default:
-      label = count + " scripts available";
+      case 0:
+        label = "No scripts available";
+        break;
+      case 1:
+        label = "1 script available";
+        break;
+      default:
+        label = count + " scripts available";
     }
 
     this._menuItem.setAttribute("label", label);
@@ -119,7 +121,6 @@ var GreasefireController = {
   },
 
   handleEvent: function(aEvent) {
-
     if (aEvent.type == "load") {
       this._setupMenu();
 

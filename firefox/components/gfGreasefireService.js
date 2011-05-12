@@ -2,13 +2,11 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-Components.utils.import("resource://gre/modules/ISO8601DateUtils.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/ISO8601DateUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const DEBUG = false;
 
@@ -22,9 +20,7 @@ function GF_GetIndexesDir() {
     return indexesDir.clone();
   }
 
-  var directoryService = Cc["@mozilla.org/file/directory_service;1"]
-                           .getService(Ci.nsIProperties);
-  var file = directoryService.get("ProfD", Ci.nsIFile);
+  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
   file.append("extensions");
   file.append("greasefire@skrul.com");
   file.append("indexes");
@@ -38,8 +34,7 @@ function d(s) {
   }
 }
 
-function gfGreasefireService()
-{
+function gfGreasefireService() {
   d("ctor");
 
   this._started = false;
@@ -60,8 +55,7 @@ gfGreasefireService.prototype = {
 }
 
 gfGreasefireService.prototype.startup =
-function gfGreasefirbeService_startup()
-{
+    function gfGreasefireService_startup() {
   d("startup");
 
   if (this._started) {
@@ -80,19 +74,16 @@ function gfGreasefirbeService_startup()
   file.append("exclude.dat");
   this._excludes = new gfIndexReader(file);
 
-  var storageService = Cc["@mozilla.org/storage/service;1"]
-                         .getService(Ci.mozIStorageService);
   file = dir.clone();
   file.append("scripts.db");
-  this._conn = storageService.openDatabase(file);
+  this._conn = Services.storage.openDatabase(file);
 
   this._started = true;
 
 }
 
 gfGreasefireService.prototype.shutdown =
-function gfGreasefireService_shutdown()
-{
+    function gfGreasefireService_shutdown() {
   d("shutdown");
 
   if (!this._started) {
@@ -118,8 +109,7 @@ function gfGreasefireService_shutdown()
 // gfIGreasefireService
 
 gfGreasefireService.prototype.hasScripts =
-function gfGreasefireService_hasScripts(aURL)
-{
+    function gfGreasefireService_hasScripts(aURL) {
   var urlSpec = this._fixUrl(aURL);
 
   var excludes = {};
@@ -136,8 +126,7 @@ function gfGreasefireService_hasScripts(aURL)
 }
 
 gfGreasefireService.prototype.search =
-function gfGreasefireService_search(aURL)
-{
+    function gfGreasefireService_search(aURL) {
   var urlSpec = this._fixUrl(aURL);
 
   var excludes = {};
@@ -168,8 +157,7 @@ function gfGreasefireService_search(aURL)
 }
 
 gfGreasefireService.prototype.__defineGetter__("scriptCount",
-function gfGreasefireService_get_scriptCount()
-{
+    function gfGreasefireService_get_scriptCount() {
   if (!this._started) {
   return 0;
   }
@@ -186,9 +174,7 @@ function gfGreasefireService_get_scriptCount()
 });
 
 gfGreasefireService.prototype.__defineGetter__("indexDate",
-function gfGreasefireService_get_indexDate(callback)
-{
-
+    function gfGreasefireService_get_indexDate(callback) {
   if (!this._indexDate) {
     this._indexDate = 0;
     var dir = GF_GetIndexesDir();
@@ -211,8 +197,7 @@ function gfGreasefireService_get_indexDate(callback)
 });
 
 gfGreasefireService.prototype._fixUrl =
-function gfGreasefireService__fixUrl(aURL)
-{
+    function gfGreasefireService__fixUrl(aURL) {
   var urlSpec = aURL.spec;
 
   // XXX performance breaks down on really long URLs, so trim to 50 chars
@@ -221,8 +206,7 @@ function gfGreasefireService__fixUrl(aURL)
 }
 
 gfGreasefireService.prototype._getScriptInfos =
-function gfGreasefireService__getSctiptInfos(matches)
-{
+    function gfGreasefireService__getScriptInfos(matches) {
   var ids = [];
   for (var id in matches) {
     ids.push(id);
@@ -246,8 +230,7 @@ function gfGreasefireService__getSctiptInfos(matches)
 }
 
 gfGreasefireService.prototype._rankMatches =
-function gfGreasefireService__rankMatches(matches, infos)
-{
+    function gfGreasefireService__rankMatches(matches, infos) {
   var ranks = [];
   var updatedMin = null;
   var updatedMax = null;
@@ -309,21 +292,18 @@ function gfGreasefireService__rankMatches(matches, infos)
 // nsIObserver
 
 gfGreasefireService.prototype.observe =
-function gfGreasefireService_observe(aSubject, aTopic, aData)
-{
+    function gfGreasefireService_observe(aSubject, aTopic, aData) {
 
   if (aTopic == NS_PROFILE_STARTUP_OBSERVER_ID) {
     this.startup();
-  }
-  else if (aTopic == NS_PROFILE_SHUTDOWN_OBSERVER_ID) {
+  } else if (aTopic == NS_PROFILE_SHUTDOWN_OBSERVER_ID) {
     this.shutdown();
     Services.obs.removeObserver(this, NS_PROFILE_STARTUP_OBSERVER_ID);
     Services.obs.removeObserver(this, NS_PROFILE_SHUTDOWN_OBSERVER_ID);
   }
 }
 
-function gfSearchResult(aScriptId, aInfo, aMatch, aRank)
-{
+function gfSearchResult(aScriptId, aInfo, aMatch, aRank) {
   this._scriptId = aScriptId;
   this._info = aInfo;
   this._match = aMatch;
@@ -331,30 +311,15 @@ function gfSearchResult(aScriptId, aInfo, aMatch, aRank)
 }
 
 gfSearchResult.prototype = {
-  get scriptId() {
-    return this._scriptId;
-  },
-  get match() {
-    return this._match;
-  },
-  get name() {
-    return this._info.name;
-  },
-  get installs() {
-    return this._info.installs;
-  },
-  get updated() {
-    return this._info.updated;
-  },
-  get rank() {
-    return this._rank;
-  }
-
+  get scriptId() this._scriptId,
+  get match() this._match,
+  get name() this._info.name,
+  get installs() this._info.installs,
+  get updated() this._info.updated,
+  get rank() this._rank
 }
 
-function gfIndexReader(aFile)
-{
-
+function gfIndexReader(aFile) {
   this._fis = Cc["@mozilla.org/network/file-input-stream;1"]
                 .createInstance(Ci.nsIFileInputStream);
   this._fis.init(aFile, -1, 0, 0);
@@ -371,7 +336,6 @@ function gfIndexReader(aFile)
 }
 
 gfIndexReader.prototype = {
-
   close: function() {
     this._fis.close();
   },
@@ -381,7 +345,6 @@ gfIndexReader.prototype = {
   },
 
   _search: function(aUrl, aIndexPos, aStringPos, aMatchedCount, aMatches, aFirstOnly, aExcludes) {
-
     var o = this._cache[aIndexPos];
     if (!o) {
       o = {};
@@ -491,12 +454,9 @@ var NSGetFactory = null;
 // Firefox4 support   2011/4/24 by TonyQ
 
 gfGreasefireService.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.gfIGreasefireService,
-                         Ci.nsIObserver]);
+    XPCOMUtils.generateQI([Ci.gfIGreasefireService, Ci.nsIObserver]);
 
 gfSearchResult.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.gfISearchResult]);
+    XPCOMUtils.generateQI([Ci.gfISearchResult]);
 
-var NSGetFactory = XPCOMUtils.generateNSGetFactory([
-    gfGreasefireService
-]);
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([gfGreasefireService]);
