@@ -2,13 +2,11 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-Components.utils.import("resource://gre/modules/ISO8601DateUtils.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/ISO8601DateUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 const DEBUG = false;
 
@@ -22,9 +20,7 @@ function GF_GetIndexesDir() {
     return indexesDir.clone();
   }
 
-  var directoryService = Cc["@mozilla.org/file/directory_service;1"]
-                           .getService(Ci.nsIProperties);
-  var file = directoryService.get("ProfD", Ci.nsIFile);
+  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
   file.append("extensions");
   file.append("greasefire@skrul.com");
   file.append("indexes");
@@ -80,11 +76,9 @@ function gfGreasefirbeService_startup()
   file.append("exclude.dat");
   this._excludes = new gfIndexReader(file);
 
-  var storageService = Cc["@mozilla.org/storage/service;1"]
-                         .getService(Ci.mozIStorageService);
   file = dir.clone();
   file.append("scripts.db");
-  this._conn = storageService.openDatabase(file);
+  this._conn = Services.storage.openDatabase(file);
 
   this._started = true;
 
