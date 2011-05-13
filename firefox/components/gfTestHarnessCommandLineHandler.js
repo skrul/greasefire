@@ -160,18 +160,6 @@ gfTestHarnessCommandLineHandler.prototype.QueryInterface =
 gfTestHarnessConsoleListener.prototype.QueryInterface =
   XPCOMUtils.generateQI([Ci.nsIConsoleListener]);
 
-var NSGetModule = XPCOMUtils.generateNSGetModule(
-  [
-    gfTestHarnessCommandLineHandler,
-    gfTestHarnessConsoleListener
-  ],
-  function(aCompMgr, aFileSpec, aLocation) {
-    XPCOMUtils.categoryManager.addCategoryEntry(
-      "command-line-handler",
-      "a-testhaness",
-      gfTestHarnessCommandLineHandler.prototype.contractID,
-      true,
-      true);
-  }
-);
-
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([
+  gfTestHarnessCommandLineHandler, gfTestHarnessConsoleListener
+]);

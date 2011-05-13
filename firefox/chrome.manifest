@@ -11,5 +11,12 @@ component {d647ff9b-ac4c-4d0e-8fbd-484765be5549} components/gfGreasefireService.
 contract @skrul.com/greasefire/service;1 {d647ff9b-ac4c-4d0e-8fbd-484765be5549}
 category profile-after-change @skrul.com/greasefire/service;1 @skrul.com/greasefire/service;1
 
+component {0c1b14b2-4a2c-4ba4-bf38-0f6844439986} components/gfTestHarnessCommandLineHandler.js
+contract @skrul.com/greasefire/testharness/commandlinehandler;1 {0c1b14b2-4a2c-4ba4-bf38-0f6844439986}s
+category command-line-handler @skrul.com/greasefire/testharness/commandlinehandler;1 @skrul.com/greasefire/testharness/commandlinehandler;1
+
+component {52b17aee-2705-42e0-bf2d-92afb900c4c8} components/gfTestHarnessCommandLineHandler.js
+contract @skrul.com/greasefire/testharness/consolelistener;1 {52b17aee-2705-42e0-bf2d-92afb900c4c8}
+
 overlay    chrome://greasefire/content/prefs.xul chrome://greasefire/content/closewindow.xul
 overlay    chrome://greasefire/content/picker.xul chrome://greasefire/content/closewindow.xul
