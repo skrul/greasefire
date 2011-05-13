@@ -67,18 +67,29 @@ var PickerController = {
     }
   },
 
-  installSelected: function () {
+  _installScript: function(aURL) {
+    var win = Services.wm.getMostRecentWindow("navigator:browser");
 
+    // If we don't have a recent window, open a new one
+    if (!win) {
+      window.open(aURL);
+      return;
+    }
+
+    var uri = Services.io.newURI(aURL, null, null);
+
+    if (win.GM_BrowserUI)  // for GM
+      win.GM_BrowserUI.startInstallScript(uri, false);
+    else if (win.Scriptish_installUri) // for Scriptish
+      win.Scriptish_installUri(uri, win);
+  },
+
+  installSelectedScript: function () {
     var index = this._list.view.selection.currentIndex;
     var info = this._view.getInfo(index);
 
     var uriSpec = US_BASE + "source/" + info.scriptId + ".user.js";
-    var uri = Services.io.newURI(uriSpec, null, null);
-
-	if(window.opener.GM_BrowserUI)  //for GM
-		window.opener.GM_BrowserUI.startInstallScript(uri, false);
-	else if(window.opener.Scriptish_installUri) //for Scriptish
-		window.opener.Scriptish_installUri(uri, window.opener);
+    this._installScript(uriSpec);
   },
 
   updateFilter: function() {
@@ -111,8 +122,7 @@ var PickerController = {
         var href = target.getAttribute("href");
 
         if (target.className == "userjs") {
-          var uri = Services.io.newURI(href, null, null);
-          window.opener.GM_BrowserUI.startInstallScript(uri, false);
+          this._installScript(href);
           return false;
         }
 
