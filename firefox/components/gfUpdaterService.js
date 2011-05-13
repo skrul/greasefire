@@ -2,10 +2,7 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu} = Components;
 
 const MINUTE_IN_MS = 60 * 1000;
 
@@ -18,8 +15,8 @@ const UPDATE_URL = "http://skrul.com/projects/greasefire/update.php";
 
 const JARFILES = ["include.dat", "exclude.dat", "scripts.db", "info.ini"];
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 
 function TRYIGNORE(aFunc) {
@@ -67,9 +64,7 @@ function gfUpdaterService__startup()
   this._gfs = Cc["@skrul.com/greasefire/service;1"]
                 .getService(Ci.gfIGreasefireService);
 
-  this._prefs = Cc["@mozilla.org/preferences-service;1"]
-                  .getService(Components.interfaces.nsIPrefService)
-                  .getBranch("greasefire.");
+  this._prefs = Services.prefs.getBranch("greasefire.");
 
   // If we are overdue for an update at startup, push it a minute in the future
   // so we don't slow down startup
@@ -116,9 +111,7 @@ function gfUpdaterService__processDownload()
       zipReader.test(e);
     });
 
-    var directoryService = Cc["@mozilla.org/file/directory_service;1"]
-                             .getService(Ci.nsIProperties);
-    var exDir = directoryService.get("ProfD", Ci.nsIFile);
+    var exDir = Services.dirsvc.get("ProfD", Ci.nsIFile);
     exDir.append("extensions");
     exDir.append("greasefire@skrul.com");
 
@@ -232,16 +225,12 @@ function gfUpdaterService_startUpdate(aForce)
     this._wbp.progressListener = this;
 
     // Create a destination file for the download
-    this._dest = Cc["@mozilla.org/file/directory_service;1"]
-                 .getService(Ci.nsIProperties)
-                 .get("TmpD", Ci.nsIFile);
+    this._dest = Services.dirsvc.get("TmpD", Ci.nsIFile);
     this._dest.append("greasefire_index_download.jar");
     this._dest.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
 
     // Start the download
-    var ios = Cc["@mozilla.org/network/io-service;1"]
-                .getService(Ci.nsIIOService);
-    var uri = ios.newURI(UPDATE_URL, null, null);
+    var uri = Services.io.newURI(UPDATE_URL, null, null);
 
     var headers = null;
     if (this._gfs.indexDate > 0 && !aForce) {

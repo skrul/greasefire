@@ -1,6 +1,6 @@
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://gre/modules/Services.jsm");
 
 function runTest() {
 
@@ -19,14 +19,9 @@ function runTest() {
   usis.request(13269, obs);
   usis.request(24556, obs);
 
-  const ww = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-               .getService(Ci.nsIWindowWatcher);
-
-  ww.openWindow(null,
-                "chrome://greasefire/content/results.xul",
-                "_blank",
-                "chrome,all,dialog=no",
-                null);
-
-
+  Services.ww.openWindow(null,
+                         "chrome://greasefire/content/results.xul",
+                         "_blank",
+                         "chrome,all,dialog=no",
+                         null);
 }

@@ -2,11 +2,10 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
+const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu} = Components;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 function d(s) {
   dump("gfTestHarnessCommandLineHandler: " + s + "\n");
@@ -24,9 +23,7 @@ function gfTestHarnessRunEnvironment_log(s)
 gfTestHarnessRunEnvironment.prototype.newURI =
 function gfTestHarnessRunEnvironment_newURI(aSpec)
 {
-  var ios = Components.classes["@mozilla.org/network/io-service;1"]
-                      .getService(Components.interfaces.nsIIOService);
-  return ios.newURI(aSpec, null, null);
+  return Services.io.newURI(aSpec, null, null);
 }
 
 gfTestHarnessRunEnvironment.prototype.assertEqual =
@@ -94,29 +91,24 @@ function gfTestHarnessCommandLineHandler_handle(aCommandLine)
 gfTestHarnessCommandLineHandler.prototype._runTest =
 function gfTestHarnessCommandLineHandler__runTest(aPath)
 {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"]
-                         .getService(Ci.nsIConsoleService);
   var consoleListener = Cc["@skrul.com/greasefire/testharness/consolelistener;1"]
                           .createInstance(Ci.nsIConsoleListener);
-  consoleService.registerListener(consoleListener);
-
-  var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
-                 .getService(Ci.mozIJSSubScriptLoader);
+  Services.console.registerListener(consoleListener);
 
   var o = new gfTestHarnessRunEnvironment();
   var shouldQuit = true;
 
   var url = "chrome://greasefire/content/test/" + aPath;
-  consoleService.logStringMessage("Running test at '" + url + "'");
+  Services.console.logStringMessage("Running test at '" + url + "'");
 
   try {
-    loader.loadSubScript(url, o);
+    Services.scriptloader.loadSubScript(url, o);
     shouldQuit = !o.runTest();
-    consoleService.logStringMessage("PASSED");
+    Services.console.logStringMessage("PASSED");
   }
   catch(e) {
-    consoleService.logStringMessage("FAILED");
-    Components.utils.reportError(e);
+    Services.console.logStringMessage("FAILED");
+    Cu.reportError(e);
     var stack = e.location;
     while (stack) {
       dump("  " + stack + "\n");
