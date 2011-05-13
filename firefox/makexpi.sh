@@ -1,4 +1,5 @@
 #!/bin/bash
+
 zip \
   greasefire.xpi \
   install.rdf \
@@ -6,4 +7,9 @@ zip \
   components/* \
   defaults/preferences/* \
   chrome/content/* \
-  indexes/*
+  chrome/content/test/* \
+  indexes/*d
+
+if [[ "test" != "$1" ]]; then
+  zip -d greasefire.xpi chrome/content/test/ chrome/content/test/*
+fi
