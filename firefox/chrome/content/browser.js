@@ -11,7 +11,6 @@ var GreasefireController = {
   _currentResults: null,
   _currentURI: null,
   _toolbutton: null,
-  _menuItem: null,
   init: function() {
     XPCOMUtils.defineLazyServiceGetter(
         this, "_gfs", "@skrul.com/greasefire/service;1",
