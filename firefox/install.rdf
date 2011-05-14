@@ -26,7 +26,6 @@
     <em:homepageURL>http://skrul.com/blog/projects/greasefire</em:homepageURL>
     <em:description>Automatically find Greasemonkey scripts on Userscripts.org</em:description>
     <em:optionsURL>chrome://greasefire/content/prefs.xul</em:optionsURL>
-    <em:iconURL>chrome://greasefire/content/icon_medium.png</em:iconURL>
 
     <em:contributor>Flame images from Foxkeh's Blog (http://www.foxkeh.com)</em:contributor>
     <em:contributor>Erik Vold (http://erikvold.com)</em:contributor>

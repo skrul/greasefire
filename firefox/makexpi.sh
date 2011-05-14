@@ -3,6 +3,7 @@
 zip \
   greasefire.xpi \
   install.rdf \
+  icon.png \
   chrome.manifest \
   components/* \
   defaults/preferences/* \
