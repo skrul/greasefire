@@ -104,7 +104,7 @@
     <button
       label="Install"
       id="install"
-      oncommand="PickerController.installSelected();"
+      oncommand="PickerController.installSelectedScript();"
     />
   </vbox>
 </hbox>
