@@ -31,10 +31,9 @@
     <hbox>
       <textbox
         id="filter"
-        type="timed"
+        type="search"
         flex="1"
         emptytext="Filter scripts..."
-        timeout="500"
         oncommand="PickerController.updateFilter();"
       />
     </hbox>
