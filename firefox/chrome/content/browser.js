@@ -11,7 +11,7 @@ var GreasefireController = {
   _currentResults: null,
   _currentURI: null,
   _toolbutton: null,
-  _inited: false,
+  _menuItem: null,
   init: function() {
     XPCOMUtils.defineLazyServiceGetter(
         this, "_gfs", "@skrul.com/greasefire/service;1",
@@ -38,16 +38,19 @@ var GreasefireController = {
 	return document.getElementById("scriptish_general_menu") != null;
   },
   _setupMenu: function() {
+    if (this._menuItem)
+        return false;
+
     var popup = null;
-	if(this.isFirefox4GM()){ //firefox 4
+
+    if (this.isFirefox4GM()) { //firefox 4
 		this._toolbutton = document.getElementById("greasemonkey-tbb");
-	}else if(this.isScriptish()){
+	} else if (this.isScriptish()) {
 		this._toolbutton = document.getElementById("scriptish-button");
 	}
-	if(!this._toolbutton) //ugithub #8 :for prevening the js error when no greasemonkey or scriptish enabled
-		return false;
 
-	this._inited = true;
+    if (!this._toolbutton) // github #8 :for prevening the js error when no greasemonkey or scriptish enabled
+      return false;
 
 	popup = this._toolbutton.firstChild;
 
@@ -58,15 +61,17 @@ var GreasefireController = {
     // "oncommand" but this caused a strange bug (only on windows) where right
     // clicking on an installed script in the same popup menu would cause the
     // oncommand event to be triggered.
-    this._menuItem.setAttribute("label","Grease File...");
     this._menuItem.setAttribute("onmouseup",
                                 "GreasefireController.openResults()");
     popup.insertBefore(this._menuItem, popup.firstChild);
+
+    window.removeEventListener("aftercustomization", this, false);
+    this._newLocation(gBrowser.currentURI);
   },
 
   _updateMenu: function() {
-    if(!this._inited)
-	   return false;
+    if (!this._menuItem)
+      return false;
 
     var count = this._currentResults ? this._currentResults.length : 0;
     var label;
@@ -94,9 +99,8 @@ var GreasefireController = {
   },
 
   openResults: function() {
-    if (!this._currentResults) {
+    if (!this._currentResults)
       return;
-    }
 
     var params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
                    .createInstance(Ci.nsIDialogParamBlock);
@@ -112,10 +116,14 @@ var GreasefireController = {
   },
 
   handleEvent: function(aEvent) {
-    if (aEvent.type == "load") {
-      this._setupMenu();
-
+    switch (aEvent.type) {
+    case "load":
+      window.addEventListener("aftercustomization", this, false);
       gBrowser.addProgressListener(this);
+      // no break
+    case "aftercustomization":
+      this._setupMenu();
+      break;
     }
   },
 
