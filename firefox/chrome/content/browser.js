@@ -74,19 +74,8 @@ var GreasefireController = {
       return false;
 
     var count = this._currentResults ? this._currentResults.length : 0;
-    var label;
-    switch(count) {
-    case 0:
-      label = "No scripts available";
-      break;
-    case 1:
-      label = "1 script available";
-      break;
-    default:
-      label = count + " scripts available";
-    }
 
-    this._menuItem.setAttribute("label", label);
+    this._menuItem.setAttribute("label", (count + " script(s) available"));
     this._menuItem.setAttribute("disabled", count == 0 ? "true" : "false");
 
     if (this._toolbutton) {
