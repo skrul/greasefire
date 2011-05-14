@@ -2,16 +2,10 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-if(!("Cc" in window))
-  window.Cc = Components.classes;
-if(!("Ci" in window))
-  window.Ci = Components.interfaces;
 
 var GreasefireController = {
 
   _XUL_NS: "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
-  _ios: null,
-  _gfs: null,
   _appContext: null,
   _menuItem: null,
   _currentResults: null,
@@ -19,10 +13,9 @@ var GreasefireController = {
   _toolbutton: null,
   _inited: false,
   init: function() {
-    this._ios = Cc["@mozilla.org/network/io-service;1"]
-                  .getService(Ci.nsIIOService);
-    this._gfs = Cc["@skrul.com/greasefire/service;1"]
-                  .getService(Ci.gfIGreasefireService);
+    XPCOMUtils.defineLazyServiceGetter(
+        this, "_gfs", "@skrul.com/greasefire/service;1",
+        "gfIGreasefireService");
 
     window.addEventListener("load", this, false);
   },
@@ -55,8 +48,8 @@ var GreasefireController = {
 		return false;
 
 	this._inited = true;
-			
-	popup = this._toolbutton.firstChild;	
+
+	popup = this._toolbutton.firstChild;
 
     popup.insertBefore(document.createElementNS(this._XUL_NS, "menuseparator"),
                        popup.firstChild);
@@ -74,7 +67,7 @@ var GreasefireController = {
   _updateMenu: function() {
     if(!this._inited)
 	   return false;
-	
+
     var count = this._currentResults ? this._currentResults.length : 0;
     var label;
     switch(count) {
@@ -119,7 +112,6 @@ var GreasefireController = {
   },
 
   handleEvent: function(aEvent) {
-
     if (aEvent.type == "load") {
       this._setupMenu();
 
