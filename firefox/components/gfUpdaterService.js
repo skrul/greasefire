@@ -138,7 +138,6 @@ function gfUpdaterService__processDownload()
         oldIndexDir.moveTo(backupDir, "");
       }
       unpackDir.moveTo(null, "indexes");
-      this._gfs.startup();
     }
     catch (e) {
       // Something went wrong, move things back
@@ -148,8 +147,8 @@ function gfUpdaterService__processDownload()
 
       unpackDir.remove(true);
       oldIndexDir.moveTo(exDir, "");
-      this._gfs.startup();
     }
+    this._gfs.startup();
 
     // Everything is ok, delete the backup dir
     backupDir.remove(true);
