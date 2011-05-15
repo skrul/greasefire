@@ -11,17 +11,10 @@ function $(id) {
 
 var PrefsController = {
 
-  _gfs: null,
-  _up: null,
+  _gfs: Cc["@skrul.com/greasefire/service;1"].getService().wrappedJSObject,
+  _up: Cc["@skrul.com/greasefire/updater;1"].getService().wrappedJSObject,
 
   init: function PrefsController_init() {
-    XPCOMUtils.defineLazyServiceGetter(
-        this, "_gfs", "@skrul.com/greasefire/service;1",
-        "gfIGreasefireService");
-
-    this._up = Cc["@skrul.com/greasefire/updater;1"]
-                 .getService(Ci.gfIUpdaterService);
-
     $("days").value = this._up.updateIntervalMinutes / 1440; // (1440 = 24 * 60)
 
     this._up.addListener(this);
@@ -125,6 +118,6 @@ var PrefsController = {
   },
 
   QueryInterface: XPCOMUtils.generateQI([
-      Ci.nsISupports, Ci.gfIUpdateListener, Ci.nsIDOMEventListener])
+      Ci.nsISupports, Ci.nsIDOMEventListener])
 
 }

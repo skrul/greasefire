@@ -34,9 +34,9 @@ var PickerController = {
 
   init: function PickerController_init() {
 
-    var params = window.arguments[0].QueryInterface(Ci.nsIDialogParamBlock);
-    this._results = params.objects.queryElementAt(0, Ci.nsIArray);
-    var uri = params.objects.queryElementAt(1, Ci.nsIURI);
+    var params = window.arguments[0];
+    this._results = params.results;
+    var uri = params.currentURI;
 
     document.title = "Scripts for \"" + uri.spec + "\"";
 
@@ -206,11 +206,9 @@ var PickerController = {
 
 function ResultsView(aResults) {
 
-  this._a = [];
+  this._a = aResults;
   this._view = [];
-  for (var i = 0; i < aResults.length; i++) {
-    var result = aResults.queryElementAt(i, Ci.gfISearchResult);
-    this._a.push(result);
+  for (var len = aResults.length, i = 0; i < len; i++) {
     this._view.push(i);
   }
   this._sort();

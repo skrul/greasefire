@@ -38,6 +38,7 @@ function gfGreasefireService()
 {
   d("ctor");
 
+  this.wrappedJSObject = this;
   this._started = false;
   this._includes = null;
   this._excludes = null;
@@ -109,8 +110,6 @@ function gfGreasefireService_shutdown()
   this._started = false;
 }
 
-// gfIGreasefireService
-
 gfGreasefireService.prototype.hasScripts =
 function gfGreasefireService_hasScripts(aURL)
 {
@@ -132,6 +131,11 @@ function gfGreasefireService_hasScripts(aURL)
 gfGreasefireService.prototype.search =
 function gfGreasefireService_search(aURL)
 {
+  var result = [];
+  if (!this._includes || !this._excludes) {
+    return result;
+  }
+
   var urlSpec = this._fixUrl(aURL);
 
   var excludes = {};
@@ -145,11 +149,10 @@ function gfGreasefireService_search(aURL)
 
   var infos = this._getScriptInfos(matches);
   var ranks = this._rankMatches(matches, infos);
-  var result = Cc["@mozilla.org/array;1"].createInstance(Ci.nsIMutableArray);
   for (var id in matches) {
     if (infos[id]) {
       var r = new gfSearchResult(id, infos[id], matches[id], ranks[id]);
-      result.appendElement(r, false);
+      result.push(r);
     }
   }
 
@@ -485,11 +488,7 @@ var NSGetFactory = null;
 // Firefox4 support   2011/4/24 by TonyQ
 
 gfGreasefireService.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.gfIGreasefireService,
-                         Ci.nsIObserver]);
-
-gfSearchResult.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.gfISearchResult]);
+  XPCOMUtils.generateQI([Ci.nsIObserver]);
 
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([
     gfGreasefireService

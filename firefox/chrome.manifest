@@ -2,7 +2,6 @@ skin greasefire classic/1.0 chrome/content/
 overlay chrome://browser/content/browser.xul chrome://greasefire/content/browser.xul
 content greasefire chrome/content/
 
-interfaces components/greasefire.xpt
 component {7c5b9317-0b18-4390-9a0a-a594d544a99f} components/gfUpdaterService.js
 contract @skrul.com/greasefire/updater;1 {7c5b9317-0b18-4390-9a0a-a594d544a99f}
 category profile-after-change @skrul.com/greasefire/updater;1 @skrul.com/greasefire/updater;1

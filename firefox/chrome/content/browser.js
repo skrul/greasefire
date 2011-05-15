@@ -12,9 +12,9 @@ var GreasefireController = {
   _currentURI: null,
   _toolbutton: null,
   init: function() {
-    XPCOMUtils.defineLazyServiceGetter(
-        this, "_gfs", "@skrul.com/greasefire/service;1",
-        "gfIGreasefireService");
+    XPCOMUtils.defineLazyGetter(this, "_gfs", function() {
+      return Cc["@skrul.com/greasefire/service;1"].getService().wrappedJSObject;
+    });
 
     window.addEventListener("load", this, false);
   },
@@ -23,8 +23,7 @@ var GreasefireController = {
     this._currentURI = aURI;
     if (aURI) {
       this._currentResults = this._gfs.search(aURI);
-    }
-    else {
+    } else {
       this._currentResults = null;
     }
 
@@ -90,12 +89,10 @@ var GreasefireController = {
     if (!this._currentResults)
       return;
 
-    var params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
-                   .createInstance(Ci.nsIDialogParamBlock);
-    var array = Cc["@mozilla.org/array;1"].createInstance(Ci.nsIMutableArray);
-    array.appendElement(this._currentResults, false);
-    array.appendElement(this._currentURI, false);
-    params.objects = array;
+    var params = {
+      results: this._currentResults,
+      currentURI: this._currentURI
+    };
 
     openDialog("chrome://greasefire/content/picker.xul",
                "",

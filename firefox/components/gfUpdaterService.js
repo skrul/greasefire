@@ -37,6 +37,7 @@ function d(s) {
 function gfUpdaterService() {
   d("ctor");
 
+  this.wrappedJSObject = this;
   this._gfs = null;
   this._prefs = null;
   this._isUpdating = false;
@@ -61,8 +62,7 @@ function gfUpdaterService__startup()
 {
   d("startup");
 
-  this._gfs = Cc["@skrul.com/greasefire/service;1"]
-                .getService(Ci.gfIGreasefireService);
+  this._gfs = Cc["@skrul.com/greasefire/service;1"].getService().wrappedJSObject;
 
   this._prefs = Services.prefs.getBranch("greasefire.");
 
@@ -206,7 +206,6 @@ function gfUpdaterService__notify(aFunc)
   });
 }
 
-// gfIUpdaterService
 gfUpdaterService.prototype.startUpdate =
 function gfUpdaterService_startUpdate(aForce)
 {
@@ -405,8 +404,7 @@ function gfUpdaterService_observe(aSubject, aTopic, aData)
 
 var NSGetFactory = null;
 gfUpdaterService.prototype.QueryInterface =
-  XPCOMUtils.generateQI([Ci.gfIUpdaterService,
-                         Ci.nsIObserver,
+  XPCOMUtils.generateQI([Ci.nsIObserver,
                          Ci.nsIWebProgressListener,
                          Ci.nsITimerCallback]);
 NSGetFactory = XPCOMUtils.generateNSGetFactory([gfUpdaterService]);
