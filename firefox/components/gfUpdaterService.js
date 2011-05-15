@@ -4,7 +4,7 @@
  */
 const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu} = Components;
 
-const MINUTE_IN_MS = 60 * 1000;
+const MINUTE_IN_MS = 60000;
 
 const DEBUG = false;
 
