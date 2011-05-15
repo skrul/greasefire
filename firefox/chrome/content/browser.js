@@ -86,8 +86,8 @@ var GreasefireController = {
   },
 
   openResults: function() {
-    if (!this._currentResults)
-      return;
+    if (!this._currentResults || !this._currentResults.length)
+      return false;
 
     var params = {
       results: this._currentResults,
