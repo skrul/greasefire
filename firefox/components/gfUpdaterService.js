@@ -112,7 +112,6 @@ function gfUpdaterService__processDownload()
     });
 
     var exDir = Services.dirsvc.get("ProfD", Ci.nsIFile);
-    exDir.append("extensions");
     exDir.append("greasefire@skrul.com");
 
     var unpackDir = exDir.clone();
@@ -213,6 +212,7 @@ function gfUpdaterService_startUpdate(aForce)
     return;
   }
 
+  var self = this;
   this._isUpdating = true;
   this._notify(function(l) {
     l.onUpdateStarted();
@@ -232,12 +232,14 @@ function gfUpdaterService_startUpdate(aForce)
     var uri = Services.io.newURI(UPDATE_URL, null, null);
 
     var headers = null;
-    if (this._gfs.indexDate > 0 && !aForce) {
-      headers = "If-Modified-Since: " +
-                (new Date(this._gfs.indexDate)).toGMTString() + "\r\n";
-    }
+    this._gfs.getIndexDate(function(aDate) {
+      if (aDate > 0 && !aForce) {
+        headers = "If-Modified-Since: " +
+                  (new Date(aDate)).toGMTString() + "\r\n";
+      }
 
-    this._wbp.saveURI(uri, null, null, null, headers, this._dest);
+      self._wbp.saveURI(uri, null, null, null, headers, self._dest);
+    });
   }
   catch (e) {
     // Something went wrong setting up the download.

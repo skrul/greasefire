@@ -93,8 +93,8 @@ var PrefsController = {
     }
   },
 
-  _updateDisplay: function () {
-    $("index-date").value = (new Date(this._gfs.indexDate)).toLocaleString();
+  _updateDisplay: function() (this._gfs.getIndexDate((function(aDate) {
+    $("index-date").value = (new Date(aDate)).toLocaleString();
     $("script-count").value = this._gfs.scriptCount;
 
     if (this._up.updateIntervalMinutes > 0) {
@@ -115,7 +115,7 @@ var PrefsController = {
       $("update-button").label = "Update now";
       $("throbber").hidden = true;
     }
-  },
+  }).bind(this))),
 
   QueryInterface: XPCOMUtils.generateQI([
       Ci.nsISupports, Ci.nsIDOMEventListener])

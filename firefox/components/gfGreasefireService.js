@@ -7,6 +7,7 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://gre/modules/ISO8601DateUtils.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/AddonManager.jsm");
 
 const DEBUG = false;
 
@@ -14,18 +15,35 @@ const NS_PROFILE_STARTUP_OBSERVER_ID  = "profile-after-change";
 const NS_PROFILE_SHUTDOWN_OBSERVER_ID = "profile-before-change";
 
 var indexesDir = null;
-function GF_GetIndexesDir() {
+function GF_GetIndexesDir(aCallback) {
   var installLocation = null;
   if (indexesDir) {
-    return indexesDir.clone();
+    return aCallback(indexesDir.clone());
   }
 
+  var addonID = "greasefire@skrul.com";
   var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-  file.append("extensions");
-  file.append("greasefire@skrul.com");
+  file.append(addonID);
+  var profDir = file.clone();
   file.append("indexes");
   indexesDir = file;
-  return file.clone();
+
+  // if the profile directory DNE then create it
+  if (!file.exists()) {
+    AddonManager.getAddonByID(addonID, function(aAddon) {
+      Cu.import("resource://gre/modules/NetUtil.jsm");
+      Cu.import("resource://gre/modules/FileUtils.jsm");
+
+      var xpiIndexesDir = aAddon.getResourceURI("indexes")
+          .QueryInterface(Ci.nsIFileURL).file;
+
+      xpiIndexesDir.copyTo(profDir, "indexes");
+    });
+
+    return;
+  }
+
+  aCallback(indexesDir.clone());
 }
 
 function d(s) {
@@ -65,23 +83,25 @@ function gfGreasefirbeService_startup()
     return;
   }
 
+  var self = this;
   this._scriptCount = null;
   this._indexDate = null;
 
-  var dir = GF_GetIndexesDir();
-  var file = dir.clone() ;
-  file.append("include.dat");
-  this._includes = new gfIndexReader(file);
+  GF_GetIndexesDir(function(dir) {
+    var file = dir.clone() ;
+    file.append("include.dat");
+    self._includes = new gfIndexReader(file);
 
-  file = dir.clone();
-  file.append("exclude.dat");
-  this._excludes = new gfIndexReader(file);
+    file = dir.clone();
+    file.append("exclude.dat");
+    self._excludes = new gfIndexReader(file);
 
-  file = dir.clone();
-  file.append("scripts.db");
-  this._conn = Services.storage.openDatabase(file);
+    file = dir.clone();
+    file.append("scripts.db");
+    self._conn = Services.storage.openDatabase(file);
 
-  this._started = true;
+    self._started = true;
+  });
 
 }
 
@@ -113,6 +133,10 @@ function gfGreasefireService_shutdown()
 gfGreasefireService.prototype.hasScripts =
 function gfGreasefireService_hasScripts(aURL)
 {
+  if (!this._includes || !this._excludes) {
+    return false;
+  }
+
   var urlSpec = this._fixUrl(aURL);
 
   var excludes = {};
@@ -182,30 +206,38 @@ function gfGreasefireService_get_scriptCount()
   return this._scriptCount;
 });
 
-gfGreasefireService.prototype.__defineGetter__("indexDate",
-function gfGreasefireService_get_indexDate(callback)
+gfGreasefireService.prototype.getIndexDate =
+function gfGreasefireService_getIndexDate(aCallback)
 {
 
-  if (!this._indexDate) {
-    this._indexDate = 0;
-    var dir = GF_GetIndexesDir();
-    var iniFile = GF_GetIndexesDir();
-    iniFile.append("info.ini");
-    if (iniFile.exists()) {
-      try {
-        var ini = Cc["@mozilla.org/xpcom/ini-parser-factory;1"]
-                    .getService(Ci.nsIINIParserFactory)
-                    .createINIParser(iniFile);
-        var dateString = ini.getString("indexes", "date");
-        this._indexDate = ISO8601DateUtils.parse(dateString).getTime();
+  var self = this;
+  if (self._indexDate) {
+    aCallback(self._indexDate);
+  } else {
+    self._indexDate = 0;
+
+    GF_GetIndexesDir(function(dir) {
+      var iniFile = dir.clone();
+      iniFile.append("info.ini");
+
+      if (iniFile.exists()) {
+        try {
+          var ini = Cc["@mozilla.org/xpcom/ini-parser-factory;1"]
+                      .getService(Ci.nsIINIParserFactory)
+                      .createINIParser(iniFile);
+
+          var dateString = ini.getString("indexes", "date");
+          self._indexDate = ISO8601DateUtils.parse(dateString).getTime();
+        }
+        catch (e) {
+          Cu.reportError(e);
+        }
       }
-      catch (e) {
-        Cu.reportError(e);
-      }
-    }
+
+      aCallback(self._indexDate);
+    });
   }
-  return this._indexDate;
-});
+};
 
 gfGreasefireService.prototype._fixUrl =
 function gfGreasefireService__fixUrl(aURL)
