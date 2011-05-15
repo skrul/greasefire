@@ -3,7 +3,7 @@
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 
 function GF_Trim(s) {
@@ -198,15 +198,9 @@ var PickerController = {
     $("throbber").className = this._busyCount ? "throbber-throb" : "throbber";
   },
 
-  QueryInterface: function (aIID) {
-    if (!aIID.equals(Ci.nsISupports) &&
-        !aIID.equals(Ci.nsIDOMEventListener) &&
-        !aIID.equals(Ci.nsIWebProgressListener) &&
-        !aIID.equals(Ci.nsISupportsWeakReference))
-      throw Components.results.NS_ERROR_NO_INTERFACE;
-
-    return this;
-  }
+  QueryInterface: XPCOMUtils.generateQI([
+      Ci.nsISupports, Ci.nsIDOMEventListener, Ci.nsIWebProgressListener,
+      Ci.nsISupportsWeakReference])
 
 }
 
