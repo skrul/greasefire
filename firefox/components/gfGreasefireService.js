@@ -38,6 +38,7 @@ function GF_GetIndexesDir(aCallback) {
           .QueryInterface(Ci.nsIFileURL).file;
 
       xpiIndexesDir.copyTo(profDir, "indexes");
+      aCallback(indexesDir.clone());
     });
 
     return;
