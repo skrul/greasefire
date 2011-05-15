@@ -2,7 +2,8 @@
  * Copyright (C) 2008 by Steve Krulewitz <skrulx@gmail.com>
  * Licensed under GPLv2 or later, see file LICENSE in the xpi for details.
  */
-const {classes: Cc, interfaces: Ci, results: Cr} = Components;
+const {classes: Cc, interfaces: Ci, results: Cr, utils: Cu} = Components;
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function $(id) {
   return document.getElementById(id);
@@ -14,8 +15,10 @@ var PrefsController = {
   _up: null,
 
   init: function PrefsController_init() {
-    this._gfs = Cc["@skrul.com/greasefire/service;1"]
-                  .getService(Ci.gfIGreasefireService);
+    XPCOMUtils.defineLazyServiceGetter(
+        this, "_gfs", "@skrul.com/greasefire/service;1",
+        "gfIGreasefireService");
+
     this._up = Cc["@skrul.com/greasefire/updater;1"]
                  .getService(Ci.gfIUpdaterService);
 
@@ -121,13 +124,7 @@ var PrefsController = {
     }
   },
 
-  QueryInterface: function (aIID) {
-    if (!aIID.equals(Ci.nsISupports) &&
-        !aIID.equals(Ci.gfIUpdateListener) &&
-        !aIID.equals(Ci.nsIDOMEventListener))
-      throw Components.results.NS_ERROR_NO_INTERFACE;
-
-    return this;
-  }
+  QueryInterface: XPCOMUtils.generateQI([
+      Ci.nsISupports, Ci.gfIUpdateListener, Ci.nsIDOMEventListener])
 
 }
