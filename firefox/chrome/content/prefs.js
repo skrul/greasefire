@@ -22,7 +22,7 @@ var PrefsController = {
     this._up = Cc["@skrul.com/greasefire/updater;1"]
                  .getService(Ci.gfIUpdaterService);
 
-    $("days").value = this._up.updateIntervalMinutes / (24 * 60);
+    $("days").value = this._up.updateIntervalMinutes / 1440; // (1440 = 24 * 60)
 
     this._up.addListener(this);
     this._updateDisplay();
@@ -44,7 +44,7 @@ var PrefsController = {
   updateInterval: function (aDays) {
     var d = parseInt(aDays);
     if (!isNaN(d) && d >= 0) {
-      this._up.updateIntervalMinutes = d * 60 * 24;
+      this._up.updateIntervalMinutes = d * 1440; // (1440 = 24 * 60)
     }
     this._updateDisplay();
   },
