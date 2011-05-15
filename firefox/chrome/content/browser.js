@@ -87,8 +87,8 @@ var GreasefireController = {
   },
 
   openResults: function() {
-    if (!this._currentResults)
-      return;
+    if (!this._currentResults || !this._currentResults.length)
+      return false;
 
     var params = Cc["@mozilla.org/embedcomp/dialogparam;1"]
                    .createInstance(Ci.nsIDialogParamBlock);
