@@ -30,8 +30,5 @@
     <em:contributor>Flame images from Foxkeh's Blog (http://www.foxkeh.com)</em:contributor>
     <em:contributor>Erik Vold (http://erikvold.com)</em:contributor>
     <em:contributor>Greg Parris (http://phob.net)</em:contributor>
-
-    <!-- Need to unpack to access index files -->
-    <em:unpack>true</em:unpack>
   </Description>
 </RDF>

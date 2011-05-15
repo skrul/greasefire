@@ -14,6 +14,8 @@ const DEBUG = false;
 const NS_PROFILE_STARTUP_OBSERVER_ID  = "profile-after-change";
 const NS_PROFILE_SHUTDOWN_OBSERVER_ID = "profile-before-change";
 
+const JARFILES = ["include.dat", "exclude.dat", "scripts.db", "info.ini"];
+
 var indexesDir = null;
 function GF_GetIndexesDir(aCallback) {
   var installLocation = null;
@@ -34,10 +36,24 @@ function GF_GetIndexesDir(aCallback) {
       Cu.import("resource://gre/modules/NetUtil.jsm");
       Cu.import("resource://gre/modules/FileUtils.jsm");
 
-      var xpiIndexesDir = aAddon.getResourceURI("indexes")
-          .QueryInterface(Ci.nsIFileURL).file;
+      var xpi = aAddon.getResourceURI("").QueryInterface(Ci.nsIFileURL).file;
+      try {
+        var zipReader = Cc["@mozilla.org/libjar/zip-reader;1"]
+            .createInstance(Ci.nsIZipReader);
+        zipReader.open(xpi);
+        indexesDir.createUnique(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+        JARFILES.forEach(function(e) {
+          var f = indexesDir.clone();
+          f.append(e);
+          zipReader.extract("indexes/" + e, f);
+        });
+        zipReader.close();
+      } catch (e) {
+        var indexes = xpi.clone();
+        indexes.append("indexes");
+        indexes.copyTo(profDir, "indexes");
+      }
 
-      xpiIndexesDir.copyTo(profDir, "indexes");
       aCallback(indexesDir.clone());
     });
 
@@ -229,8 +245,7 @@ function gfGreasefireService_getIndexDate(aCallback)
 
           var dateString = ini.getString("indexes", "date");
           self._indexDate = ISO8601DateUtils.parse(dateString).getTime();
-        }
-        catch (e) {
+        } catch (e) {
           Cu.reportError(e);
         }
       }
