@@ -9,7 +9,7 @@ zip \
   defaults/preferences/* \
   chrome/content/* \
   chrome/content/test/* \
-  indexes/*d
+  indexes/*
 
 if [[ "test" != "$1" ]]; then
   zip -d greasefire.xpi chrome/content/test/ chrome/content/test/*
