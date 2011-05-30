@@ -55,11 +55,7 @@ var GreasefireController = {
     popup.insertBefore(document.createElementNS(this._XUL_NS, "menuseparator"),
                        popup.firstChild);
     this._menuItem = document.createElementNS(this._XUL_NS, "menuitem");
-    // Use "onmouseup" here to trigger the picker window.  This was previously
-    // "oncommand" but this caused a strange bug (only on windows) where right
-    // clicking on an installed script in the same popup menu would cause the
-    // oncommand event to be triggered.
-    this._menuItem.setAttribute("onmouseup",
+    this._menuItem.setAttribute("oncommand",
                                 "GreasefireController.openResults()");
     popup.insertBefore(this._menuItem, popup.firstChild);
 
