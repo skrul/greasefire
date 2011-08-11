@@ -4,7 +4,6 @@
  */
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-Cu.import("resource://gre/modules/ISO8601DateUtils.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -244,7 +243,7 @@ function gfGreasefireService_getIndexDate(aCallback)
                       .createINIParser(iniFile);
 
           var dateString = ini.getString("indexes", "date");
-          self._indexDate = ISO8601DateUtils.parse(dateString).getTime();
+          self._indexDate = (new Date(dateString)).getTime();
         } catch (e) {
           Cu.reportError(e);
         }
