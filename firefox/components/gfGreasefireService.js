@@ -243,7 +243,7 @@ function gfGreasefireService_getIndexDate(aCallback)
                       .createINIParser(iniFile);
 
           var dateString = ini.getString("indexes", "date");
-          self._indexDate = (new Date(dateString)).getTime();
+          self._indexDate = Date.parse(dateString);
         } catch (e) {
           Cu.reportError(e);
         }
