@@ -30,10 +30,10 @@ var GreasefireController = {
     this._updateMenu();
   },
   isFirefox4GM : function() {
-	return document.getElementById("greasemonkey-tbb") != null;
+    return document.getElementById("greasemonkey-tbb") != null;
   },
   isScriptish : function(){
-	return document.getElementById("scriptish_general_menu") != null;
+    return document.getElementById("scriptish_general_menu") != null;
   },
   _setupMenu: function() {
     if (this._menuItem)
@@ -42,13 +42,12 @@ var GreasefireController = {
     var popup = null;
 
     if (this.isFirefox4GM()) { //firefox 4
-		this._toolbutton = document.getElementById("greasemonkey-tbb");
-	} else if (this.isScriptish()) {
-		this._toolbutton = document.getElementById("scriptish-button");
-	}
-
-    if (!this._toolbutton) // github #8 :for prevening the js error when no greasemonkey or scriptish enabled
+      this._toolbutton = document.getElementById("greasemonkey-tbb");
+    } else if (this.isScriptish()) {
+      this._toolbutton = document.getElementById("scriptish-button");
+    } else {
       return false;
+    }
 
 	popup = this._toolbutton.firstChild;
 
