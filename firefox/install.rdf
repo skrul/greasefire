@@ -10,7 +10,7 @@
 #filter substitution
   <Description about="urn:mozilla:install-manifest">
     <em:id>greasefire@skrul.com</em:id>
-    <em:version>1.0.6</em:version>
+    <em:version>1.0.7</em:version>
 
     <em:targetApplication>
       <!-- Firefox -->
