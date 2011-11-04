@@ -11,8 +11,6 @@ const DEBUG = false;
 const NS_PROFILE_STARTUP_OBSERVER_ID  = "profile-after-change";
 const NS_PROFILE_SHUTDOWN_OBSERVER_ID = "profile-before-change";
 
-const UPDATE_URL = "http://skrul.com/projects/greasefire/update.php";
-
 const JARFILES = ["include.dat", "exclude.dat", "scripts.db", "info.ini"];
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -228,7 +226,9 @@ function gfUpdaterService_startUpdate(aForce)
     this._dest.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
 
     // Start the download
-    var uri = Services.io.newURI(UPDATE_URL, null, null);
+    var uri = Services.io.newURI(
+        this._prefs.getComplexValue("update_url", Ci.nsISupportsString).data,
+        null, null);
 
     var headers = null;
     this._gfs.getIndexDate(function(aDate) {
