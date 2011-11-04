@@ -263,7 +263,7 @@ ResultsView.prototype = {
     else {
       this._a.forEach(function (e, idx) {
         for (var i = 0; i < filter.length; i++) {
-          if (e.name.toLowerCase().indexOf(filter[i]) < 0) {
+          if (e.name.toLowerCase().indexOf(filter[i].toLowerCase()) < 0) {
             return;
           }
         }
