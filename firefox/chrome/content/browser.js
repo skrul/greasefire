@@ -11,6 +11,8 @@ var GreasefireController = {
   _currentResults: null,
   _currentURI: null,
   _toolbutton: null,
+  $: function(aID) document.getElementById(aID),
+
   init: function() {
     XPCOMUtils.defineLazyGetter(this, "_gfs", function() {
       return Cc["@skrul.com/greasefire/service;1"].getService().wrappedJSObject;
@@ -21,45 +23,29 @@ var GreasefireController = {
 
   _newLocation: function(aURI) {
     this._currentURI = aURI;
-    if (aURI) {
-      this._currentResults = this._gfs.search(aURI);
-    } else {
-      this._currentResults = null;
-    }
-
+    this._currentResults = aURI ? this._gfs.search(aURI) : null;
     this._updateMenu();
   },
-  isFirefox4GM : function() {
-    return document.getElementById("greasemonkey-tbb") != null;
-  },
-  isScriptish : function(){
-    return document.getElementById("scriptish_general_menu") != null;
-  },
+
   _setupMenu: function() {
     if (this._menuItem)
-        return false;
+      return false;
 
-    var popup = null;
+    this._toolbutton = this.$("greasemonkey-tbb") || this.$("scriptish-button");
 
-    if (this.isFirefox4GM()) { //firefox 4
-      this._toolbutton = document.getElementById("greasemonkey-tbb");
-    } else if (this.isScriptish()) {
-      this._toolbutton = document.getElementById("scriptish-button");
-    } else {
+    // Github #8: Prevent the JS error when neither GM or Scriptish are enabled
+    if (!this._toolbutton) {
       return false;
     }
 
-	popup = this._toolbutton.firstChild;
-
+    var popup = this._toolbutton.firstChild;
     popup.insertBefore(document.createElementNS(this._XUL_NS, "menuseparator"),
                        popup.firstChild);
+
     this._menuItem = document.createElementNS(this._XUL_NS, "menuitem");
-    // Use "onmouseup" here to trigger the picker window.  This was previously
-    // "oncommand" but this caused a strange bug (only on windows) where right
-    // clicking on an installed script in the same popup menu would cause the
-    // oncommand event to be triggered.
-    this._menuItem.setAttribute("onmouseup",
+    this._menuItem.setAttribute("oncommand",
                                 "GreasefireController.openResults()");
+
     popup.insertBefore(this._menuItem, popup.firstChild);
 
     window.removeEventListener("aftercustomization", this, false);
@@ -73,14 +59,13 @@ var GreasefireController = {
     var count = this._currentResults ? this._currentResults.length : 0;
 
     this._menuItem.setAttribute("label", (count + " script(s) available"));
-    this._menuItem.setAttribute("disabled", count == 0 ? "true" : "false");
+    this._menuItem.setAttribute("disabled", count == 0);
 
     if (this._toolbutton) {
-      if (count > 0) {
+      if (count > 0)
         this._toolbutton.classList.add("tbb-scripts-available");
-      } else {
+      else
         this._toolbutton.classList.remove("tbb-scripts-available");
-      }
     }
   },
 
