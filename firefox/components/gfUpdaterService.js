@@ -237,7 +237,7 @@ function gfUpdaterService_startUpdate(aForce)
                   (new Date(aDate)).toGMTString() + "\r\n";
       }
 
-      self._wbp.saveURI(uri, null, null, null, headers, self._dest);
+      self._wbp.saveURI(uri, null, null, null, headers, self._dest, null); // TODO: use real pricacy context
     });
   }
   catch (e) {
